@@ -1,15 +1,16 @@
 using System.Diagnostics;
+using GonzaShoes.Model.Entities.Product;
 using GonzaShoes.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace GonzaShoes.Controllers
 {
-    public class HomeController : BackendController
+    public class ProductController : BackendController
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly ILogger<ProductController> _logger;
 
-        public HomeController(ILogger<HomeController> logger)
+        public ProductController(ILogger<ProductController> logger)
         {
             _logger = logger;
         }
@@ -25,9 +26,19 @@ namespace GonzaShoes.Controllers
             return View();
         }
 
-        public IActionResult Privacy()
+        public IActionResult Create() => View();
+
+        [HttpPost]
+        public async Task<IActionResult> Create(Product product)
         {
-            return View();
+            if (ModelState.IsValid)
+            {
+                //_context.Add(product);
+                //await _context.SaveChangesAsync();
+                //return RedirectToAction(nameof(Index));
+                return View();
+            }
+            return View(product);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

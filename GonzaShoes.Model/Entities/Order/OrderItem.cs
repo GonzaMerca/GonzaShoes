@@ -1,6 +1,6 @@
-﻿using GonzaShoes.Model.Shoe;
+﻿using GonzaShoes.Model.Entities.Product;
 
-namespace GonzaShoes.Model.Order
+namespace GonzaShoes.Model.Entities.Order
 {
     public class OrderItem
     {
@@ -8,7 +8,7 @@ namespace GonzaShoes.Model.Order
         public int OrderId { get; set; }
 
         public int ProductId { get; set; }
-        public Product Product { get; set; } = null!;
+        public Product.Product Product { get; set; } = null!;
         public string ProductName { get; set; } = string.Empty;
 
         public int BrandId { get; set; }
@@ -16,7 +16,7 @@ namespace GonzaShoes.Model.Order
         public string BrandName { get; set; } = string.Empty;
 
         public int ModelId { get; set; }
-        public Shoe.Model Model { get; set; } = null!;
+        public ModelProduct Model { get; set; } = null!;
         public string ModelName { get; set; } = string.Empty;
 
         public int ColorId { get; set; }

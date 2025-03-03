@@ -5,17 +5,22 @@ namespace GonzaShoes.Model.Helper
 {
     public class SecurePasswordHasher
     {
-        public string HashPassword(string password)
+        public static string HashPassword(string password)
         {
-            using (var sha256 = SHA1.Create())
+            // Paso 1: Convertimos la contraseña a un arreglo de bytes usando UTF-8.
+            byte[] passwordBytes = Encoding.UTF8.GetBytes(password);
+
+            // Paso 2: Aplicamos SHA1 al arreglo de bytes.
+            using (var sha1 = SHA1.Create())
             {
-                string hexString = Convert.ToHexString(Encoding.UTF8.GetBytes(password));
-                byte[] hashValue = sha256.ComputeHash(Encoding.UTF8.GetBytes(hexString));
-                return Convert.ToHexString(hashValue);
+                byte[] hashValue = sha1.ComputeHash(passwordBytes);
+
+                // Paso 3: Convertimos el hash en bytes a una cadena hexadecimal en minúsculas.
+                return BitConverter.ToString(hashValue).Replace("-", "");
             }
         }
 
-        public bool Verify(string enteredPassword, string storedHashedPassword)
+        public static bool Verify(string enteredPassword, string storedHashedPassword)
         {
             return storedHashedPassword == HashPassword(enteredPassword);
         }

@@ -1,3 +1,10 @@
+using GonzaShoes.Data;
+using GonzaShoes.Data.Interfaces;
+using GonzaShoes.Data.Repositories;
+using GonzaShoes.Model;
+using GonzaShoes.Model.Configurations;
+using GonzaShoes.Service.Interfaces;
+using GonzaShoes.Service.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -5,11 +12,18 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddControllersWithViews();
+var connectionStrings = new ConnectionStrings();
+builder.Configuration.GetSection("ConnectionStrings").Bind(connectionStrings);
 
-builder.Services.AddDbContext<DbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+var appConfiguration = new AppConfiguration();
+builder.Configuration.GetSection("AppConfiguration").Bind(appConfiguration);
+
+builder.Services.Configure<ConnectionStrings>(builder.Configuration.GetSection("ConnectionStrings"));
+builder.Services.Configure<AppConfiguration>(builder.Configuration.GetSection("AppConfiguration"));
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(connectionStrings.DefaultConnection,
+        sqlServerOptions => sqlServerOptions.EnableRetryOnFailure()));
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -20,9 +34,36 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("mi_clave_secreta"))
+            ValidIssuer = "GonzaShoes",
+            ValidAudience = "GonzaShoes",
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(appConfiguration.JWTSecretKey)),
+            ClockSkew = TimeSpan.Zero
+        };
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                if (context.Request.Cookies.ContainsKey("AuthToken"))
+                    context.Token = context.Request.Cookies["AuthToken"];
+                return Task.CompletedTask;
+            }
         };
     });
+
+builder.Services.AddAutoMapper(typeof(MappingProfile));
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("RequireAuthenticatedUser", policy => policy.RequireAuthenticatedUser());
+});
+
+// Registrar repositorios y servicios
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IAccountService, AccountService>();
+
+// Add services to the container.
+builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
@@ -32,17 +73,20 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
+    app.UseHttpsRedirection();
 }
+else
+    app.UseDeveloperExceptionPage();
 
-app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Account}/{action=Login}/{id?}");
 
 app.Run();

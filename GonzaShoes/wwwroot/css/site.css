@@ -20,3 +20,8 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+/* Hacer que el dropdown se abra al pasar el mouse */
+.nav-item.dropdown:hover .dropdown-menu {
+    display: block;
+}

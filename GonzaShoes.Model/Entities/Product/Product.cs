@@ -1,4 +1,4 @@
-﻿namespace GonzaShoes.Model.Shoe
+﻿namespace GonzaShoes.Model.Entities.Product
 {
     public class Product : ContextualProps
     {
@@ -6,7 +6,7 @@
         
         // Relationship with Model
         public int ModelId { get; set; }
-        public Model Model { get; set; } = null!;
+        public ModelProduct Model { get; set; } = null!;
 
         // Relationship with Color
         public int ColorId { get; set; }

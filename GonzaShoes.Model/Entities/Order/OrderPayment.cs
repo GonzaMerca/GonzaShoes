@@ -1,4 +1,4 @@
-﻿namespace GonzaShoes.Model.Order
+﻿namespace GonzaShoes.Model.Entities.Order
 {
     public class OrderPayment : ContextualProps
     {

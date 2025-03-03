@@ -1,0 +1,21 @@
+﻿<h2>Historial de Pedidos</h2>
+<table>
+    <tr>
+        <th>Pedido</th>
+        <th>Fecha</th>
+        <th>Productos</th>
+    </tr>
+    @foreach (var order in Model)
+    {
+        <tr>
+            <td>#@order.Id</td>
+            <td>@order.CreatedAt</td>
+            <td>
+                @foreach (var item in order.OrderItems)
+                {
+                    <p>@item.Product.Name - @item.Quantity</p>
+                }
+            </td>
+        </tr>
+    }
+</table>

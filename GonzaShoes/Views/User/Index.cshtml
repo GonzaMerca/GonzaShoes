@@ -1,0 +1,54 @@
+﻿@{
+    Layout = "_Layout";
+}
+
+<h2 class="mb-4">Lista de Usuarios</h2>
+
+<a href="/User/Edit" class="btn btn-primary mb-3">Agregar Usuario</a>
+
+<table class="table table-striped table-bordered">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Email</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>@user.Name</td>
+                <td>@user.Email</td>
+                <td>
+                    @if (user.IsActive)
+                    {
+                        <span class="badge bg-success">Activo</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger">Inactivo</span>
+                    }
+                </td>
+                <td>
+                    <a href="/User/Edit/@user.Id" class="btn btn-warning btn-sm">Editar</a> |
+                    @if (user.IsActive)
+                    {
+                        <a asp-action="UpdateStatus" asp-route-id="@user.Id" asp-route-isActive="@user.IsActive"
+                           class="btn btn-danger btn-sm" onclick="return confirm('¿Seguro que deseas desactivar a este usuario?')">
+                            Desactivar
+                        </a>
+                    }
+                    else
+                    {
+                        <a asp-action="UpdateStatus" asp-route-id="@user.Id" asp-route-isActive="@user.IsActive"
+                           class="btn btn-success btn-sm" onclick="return confirm('¿Seguro que deseas activar a este usuario?')">
+                            Activar
+                        </a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

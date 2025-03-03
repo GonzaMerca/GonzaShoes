@@ -1,6 +1,6 @@
-﻿namespace GonzaShoes.Model.Shoe
+﻿namespace GonzaShoes.Model.Entities.Product
 {
-    public class Model : ContextualProps
+    public class ModelProduct : ContextualProps
     {
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;

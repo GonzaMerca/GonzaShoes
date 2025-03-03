@@ -1,6 +1,6 @@
-﻿namespace GonzaShoes.Model.User
+﻿namespace GonzaShoes.Model.DTOs.User
 {
-    public class User : ContextualProps
+    public class UserDTO : ContextualProps
     {
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;

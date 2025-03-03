@@ -1,0 +1,20 @@
+﻿<h2>Lista de Productos</h2>
+<a href="/Products/Create">Agregar Producto</a>
+<table>
+    <tr>
+        <th>Nombre</th>
+        <th>Marca</th>
+        <th>Acciones</th>
+    </tr>
+    @foreach (var product in Model)
+    {
+        <tr>
+            <td>@product.Name</td>
+            <td>@product.Brand.Name</td>
+            <td>
+                <a href="/Products/Edit/@product.Id">Editar</a> |
+                <a href="/Products/Delete/@product.Id">Eliminar</a>
+            </td>
+        </tr>
+    }
+</table>

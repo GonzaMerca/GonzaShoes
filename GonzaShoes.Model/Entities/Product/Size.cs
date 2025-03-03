@@ -1,4 +1,4 @@
-﻿namespace GonzaShoes.Model.Shoe
+﻿namespace GonzaShoes.Model.Entities.Product
 {
     public class Size : ContextualProps
     {

@@ -1,4 +1,4 @@
-﻿namespace GonzaShoes.Model.Entities.Order
+﻿namespace GonzaShoes.Model
 {
     public enum OrderStatusEnum
     {

@@ -1,9 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-
-namespace GonzaShoes.Model.Entities.Product
+﻿namespace GonzaShoes.Model.DTOs.Color
 {
-    [Table("Color")]
-    public class Color : ContextualProps
+    public class ColorDTO : ContextualProps
     {
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;

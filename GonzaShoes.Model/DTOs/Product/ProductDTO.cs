@@ -1,9 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using GonzaShoes.Model.DTOs.Color;
+using GonzaShoes.Model.DTOs.ModelProduct;
+using GonzaShoes.Model.DTOs.Size;
 
-namespace GonzaShoes.Model.Entities.Product
+namespace GonzaShoes.Model.DTOs.Product
 {
-    [Table("Product")]
-    public class Product : ContextualProps
+    public class ProductDTO : ContextualProps
     {
         public int Id { get; set; }
         //TODO: Ver de utilizar marca + model + color + talle
@@ -11,15 +12,15 @@ namespace GonzaShoes.Model.Entities.Product
 
         // Relationship with Model
         public int ModelId { get; set; }
-        public ModelProduct Model { get; set; } = null!;
+        public ModelProductDTO Model { get; set; } = null!;
 
         // Relationship with Color
         public int ColorId { get; set; }
-        public Color Color { get; set; } = null!;
+        public ColorDTO Color { get; set; } = null!;
 
         // Relationship with Size
         public int SizeId { get; set; }
-        public Size Size { get; set; } = null!;
+        public SizeDTO Size { get; set; } = null!;
 
         public decimal Price { get; set; }
         public int Stock { get; set; }

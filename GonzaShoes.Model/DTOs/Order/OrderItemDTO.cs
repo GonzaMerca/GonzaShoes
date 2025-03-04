@@ -1,32 +1,34 @@
-﻿using GonzaShoes.Model.Entities.Product;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using GonzaShoes.Model.DTOs.Brand;
+using GonzaShoes.Model.DTOs.Color;
+using GonzaShoes.Model.DTOs.ModelProduct;
+using GonzaShoes.Model.DTOs.Product;
+using GonzaShoes.Model.DTOs.Size;
 
-namespace GonzaShoes.Model.Entities.Order
+namespace GonzaShoes.Model.DTOs.Order
 {
-    [Table("OrderItem")]
-    public class OrderItem
+    public class OrderItemDTO
     {
         public int Id { get; set; }
         public int OrderId { get; set; }
 
         public int ProductId { get; set; }
-        public Product.Product Product { get; set; } = null!;
+        public ProductDTO Product { get; set; } = null!;
         public string ProductName { get; set; } = string.Empty;
 
         public int BrandId { get; set; }
-        public Brand Brand { get; set; } = null!;
+        public BrandDTO Brand { get; set; } = null!;
         public string BrandName { get; set; } = string.Empty;
 
         public int ModelId { get; set; }
-        public ModelProduct Model { get; set; } = null!;
+        public ModelProductDTO Model { get; set; } = null!;
         public string ModelName { get; set; } = string.Empty;
 
         public int ColorId { get; set; }
-        public Color Color { get; set; } = null!;
+        public ColorDTO Color { get; set; } = null!;
         public string ColorName { get; set; } = string.Empty;
 
         public int SizeId { get; set; }
-        public Size Size { get; set; } = null!;
+        public SizeDTO Size { get; set; } = null!;
         public decimal SizeNumber { get; set; }
 
         public decimal Quantity { get; set; }

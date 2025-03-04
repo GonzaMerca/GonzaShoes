@@ -1,13 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-
-namespace GonzaShoes.Model.Entities.Order
+﻿namespace GonzaShoes.Model.DTOs.Order
 {
-    [Table("OrderPayment")]
-    public class OrderPayment : ContextualProps
+    public class OrderPaymentDTO : ContextualProps
     {
         public int Id { get; set; }
         public int OrderId { get; set; }
-        public Order Order { get; set; } = null!;
+        public OrderDTO Order { get; set; } = null!;
         public decimal Amount { get; set; }
         public decimal PayWith { get; set; }
         public decimal Cash { get; set; }

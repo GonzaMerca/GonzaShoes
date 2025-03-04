@@ -1,9 +1,8 @@
+using Autofac;
+using Autofac.Extensions.DependencyInjection;
 using GonzaShoes.Data;
-using GonzaShoes.Data.Interfaces;
-using GonzaShoes.Data.Repositories;
 using GonzaShoes.Model;
 using GonzaShoes.Model.Configurations;
-using GonzaShoes.Service.Interfaces;
 using GonzaShoes.Service.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +10,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
 
 var connectionStrings = new ConnectionStrings();
 builder.Configuration.GetSection("ConnectionStrings").Bind(connectionStrings);
@@ -57,10 +58,18 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("RequireAuthenticatedUser", policy => policy.RequireAuthenticatedUser());
 });
 
-// Registrar repositorios y servicios
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IAccountService, AccountService>();
+builder.Host.ConfigureContainer<ContainerBuilder>(containerBuilder =>
+{
+    containerBuilder.RegisterAssemblyTypes(typeof(AppDbContext).Assembly)
+    .Where(t => t.Name.EndsWith("Repository"))
+    .AsImplementedInterfaces()
+    .InstancePerLifetimeScope();
+    
+    containerBuilder.RegisterAssemblyTypes(typeof(BaseService).Assembly)
+    .Where(t => t.Name.EndsWith("Service") && !t.CustomAttributes.Any(p => p.AttributeType == typeof(NotInjectable)))
+    .AsImplementedInterfaces()
+    .InstancePerLifetimeScope();
+});
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();

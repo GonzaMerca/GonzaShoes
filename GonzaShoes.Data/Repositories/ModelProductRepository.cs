@@ -1,38 +1,35 @@
 ﻿using GonzaShoes.Data.Interfaces;
-using GonzaShoes.Model.DTOs;
-using GonzaShoes.Model.DTOs.User;
-using GonzaShoes.Model.Entities.User;
+using GonzaShoes.Model.DTOs.ModelProduct;
+using GonzaShoes.Model.Entities.Product;
 using Microsoft.EntityFrameworkCore;
 
 namespace GonzaShoes.Data.Repositories
 {
-    public class UserRepository : IUserRepository
+    public class ModelProductRepository : IModelProductRepository
     {
         private readonly AppDbContext dbContext;
-        public UserRepository(AppDbContext dbContext)
+
+        public ModelProductRepository(AppDbContext dbContext)
         {
             this.dbContext = dbContext;
         }
 
-        public async Task<User?> GetUserByEmailAsync(string emailAddress)
+        public async Task<ModelProduct?> GetModelProductByIdAsync(int id)
         {
-            return await this.dbContext.Users.SingleOrDefaultAsync(p => p.Email == emailAddress.ToLowerInvariant());
+            return await this.dbContext.ModelProducts.SingleOrDefaultAsync(p => p.Id == id);
         }
 
-        public async Task<User?> GetUserByIdAsync(int id)
+        public async Task<ModelProduct?> GetModelProductByNameAsync(string name)
         {
-            return await this.dbContext.Users.SingleOrDefaultAsync(p => p.Id == id);
+            return await this.dbContext.ModelProducts.SingleOrDefaultAsync(p => p.Name == name);
         }
 
-        public async Task<List<User>> GetUsersAsync(UserSearchDTO searchDTO)
+        public async Task<List<ModelProduct>> GetModelProductsAsync(ModelProductSearchDTO searchDTO)
         {
-            IQueryable<User> query = this.dbContext.Users;
+            IQueryable<ModelProduct> query = this.dbContext.ModelProducts;
 
             if (!string.IsNullOrWhiteSpace(searchDTO.Name))
                 query = query.Where(p => p.Name.Contains(searchDTO.Name));
-
-            if (!string.IsNullOrWhiteSpace(searchDTO.Email))
-                query = query.Where(p => p.Email.Contains(searchDTO.Email));
 
             if (searchDTO.ActivationState != null)
                 query = query.Where(p => p.IsActive == searchDTO.GetActivationState());
@@ -40,19 +37,19 @@ namespace GonzaShoes.Data.Repositories
             return await query.ToListAsync();
         }
 
-        public async Task SaveUserAsync(User obj)
+        public async Task SaveModelProductAsync(ModelProduct obj)
         {
             if (obj.Id == 0)
-                await this.dbContext.Users.AddAsync(obj);
+                await this.dbContext.ModelProducts.AddAsync(obj);
             else
-                this.dbContext.Users.Update(obj);
+                this.dbContext.ModelProducts.Update(obj);
 
             await this.dbContext.SaveChangesAsync();
         }
 
-        public async Task UpdateStatusAsync(User obj)
+        public async Task UpdateStatusAsync(ModelProduct obj)
         {
-            this.dbContext.Users.Attach(obj);
+            this.dbContext.ModelProducts.Attach(obj);
 
             this.dbContext.Entry(obj).Property(p => p.IsActive).IsModified = true;
             this.dbContext.Entry(obj).Property(p => p.DateUpdated).IsModified = true;

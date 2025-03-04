@@ -1,15 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-
-namespace GonzaShoes.Model.Entities.Order
+﻿namespace GonzaShoes.Model.DTOs.Order
 {
-    [Table("Order")]
-    public class Order : ContextualProps
+    public class OrderDTO : ContextualProps
     {
         public int Id { get; set; }
         public DateTime DateTime { get; set; } = DateTime.Now;
         public OrderStatusEnum Status { get; set; } = OrderStatusEnum.Pending;
-        public OrderPayment OrderPayment { get; set; } = null!;
-        public List<OrderItem> OrderItems { get; set; } = [];
+        public OrderPaymentDTO OrderPayment { get; set; } = null!;
+        public List<OrderItemDTO> OrderItems { get; set; } = [];
         public decimal TotalWithNoDiscount { get; set; }
         public decimal Discount { get; set; }
         public decimal DiscountPercentage { get; set; }

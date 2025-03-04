@@ -30,9 +30,9 @@ namespace GonzaShoes.Service.Services
             return this.mapper.Map<User, UserDTO>(await this.userRepository.GetUserByIdAsync(id));
         }
 
-        public async Task<List<UserDTO>> GetUsersAsync()
+        public async Task<List<UserDTO>> GetUsersAsync(UserSearchDTO searchDTO)
         {
-            return this.mapper.Map<List<User>, List<UserDTO>>(await this.userRepository.GetUsersAsync());
+            return this.mapper.Map<List<User>, List<UserDTO>>(await this.userRepository.GetUsersAsync(searchDTO));
         }
 
         public async Task<ValidationResultDTO> SaveUserAsync(UserDTO dto)
@@ -98,7 +98,9 @@ namespace GonzaShoes.Service.Services
 
         public async Task<ValidationResultDTO> UpdateStatusAsync(int userId, bool isActive)
         {
-            ValidationResultDTO resultDTO = new ValidationResultDTO();
+            ValidationResultDTO validationResultDTO = ValidateUpdateStatus(userId, isActive);
+            if (validationResultDTO.HasErrors)
+                return validationResultDTO;
 
             try
             {
@@ -114,9 +116,21 @@ namespace GonzaShoes.Service.Services
             }
             catch (Exception ex)
             {
-                resultDTO.ErrorMessages.Add(ex.Message);
+                validationResultDTO.ErrorMessages.Add(ex.Message);
             }
-            return resultDTO;
+
+            return validationResultDTO;
+        }
+
+        private ValidationResultDTO ValidateUpdateStatus(int userId, bool isActive)
+        {
+            ValidationResultDTO validationResultDTO = new ValidationResultDTO();
+            if (userId == 1 && isActive)
+                validationResultDTO.ErrorMessages.Add("No se puede anular el usuario principal");
+            if (userId == this.userId && isActive)
+                validationResultDTO.ErrorMessages.Add("No podes anular el usuario logeado");
+
+            return validationResultDTO;
         }
     }
 }

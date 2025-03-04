@@ -1,7 +1,6 @@
 using System.Diagnostics;
 using GonzaShoes.Model.DTOs;
 using GonzaShoes.Model.DTOs.User;
-using GonzaShoes.Model.Entities.User;
 using GonzaShoes.Models;
 using GonzaShoes.Service.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -29,11 +28,13 @@ namespace GonzaShoes.Controllers
             return base.OnActionExecutionAsync(context, next);
         }
 
-        public async Task<IActionResult> IndexAsync()
+        public async Task<IActionResult> IndexAsync([FromQuery] UserSearchDTO searchDTO)
         {
-            List<UserDTO> users = await this.userService.GetUsersAsync();
+            var users = await userService.GetUsersAsync(searchDTO);
+
             return View(users);
         }
+
 
         public async Task<IActionResult> EditAsync(int id)
         {
@@ -55,7 +56,7 @@ namespace GonzaShoes.Controllers
             {
                 ValidationResultDTO validationResultDTO = await this.userService.UpdateStatusAsync(id, isActive);
                 if (validationResultDTO.HasErrors)
-                    ModelState.AddModelError(string.Empty, validationResultDTO.GetErrorMessages());
+                    TempData["ErrorMessage"] = validationResultDTO.GetErrorMessages();
             }
             return RedirectToAction("Index");
         }

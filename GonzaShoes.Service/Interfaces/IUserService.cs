@@ -8,7 +8,7 @@ namespace GonzaShoes.Service.Interfaces
     {
         Task<UserDTO?> GetUserByEmailAsync(string emailAddress);
         Task<UserDTO?> GetUserByIdAsync(int id);
-        Task<List<UserDTO>> GetUsersAsync();
+        Task<List<UserDTO>> GetUsersAsync(UserSearchDTO searchDTO);
         Task<ValidationResultDTO> SaveUserAsync(UserDTO user);
         Task<ValidationResultDTO> UpdateStatusAsync(int id, bool isActive);
     }

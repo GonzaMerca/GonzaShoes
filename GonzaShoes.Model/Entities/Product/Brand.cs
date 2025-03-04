@@ -1,5 +1,8 @@
-﻿namespace GonzaShoes.Model.Entities.Product
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace GonzaShoes.Model.Entities.Product
 {
+    [Table("Brand")]
     public class Brand : ContextualProps
     {
         public int Id { get; set; }

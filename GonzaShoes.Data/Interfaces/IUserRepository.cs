@@ -1,4 +1,4 @@
-﻿using GonzaShoes.Model.DTOs;
+﻿using GonzaShoes.Model.DTOs.User;
 using GonzaShoes.Model.Entities.User;
 
 namespace GonzaShoes.Data.Interfaces
@@ -7,7 +7,7 @@ namespace GonzaShoes.Data.Interfaces
     {
         Task<User?> GetUserByEmailAsync(string emailAddress);
         Task<User?> GetUserByIdAsync(int id);
-        Task<List<User>> GetUsersAsync();
+        Task<List<User>> GetUsersAsync(UserSearchDTO searchDTO);
         Task SaveUserAsync(User user);
         Task UpdateStatusAsync(User obj);
     }

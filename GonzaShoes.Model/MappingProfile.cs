@@ -12,7 +12,8 @@ namespace GonzaShoes.Model
                 .ForMember(p => p.Password, opt => opt.Ignore());
             CreateMap<UserDTO, User>()
                 .ForMember(p => p.DateCreated, opt => opt.Ignore())
-                .ForMember(p => p.CreatedUserId, opt => opt.Ignore());
+                .ForMember(p => p.CreatedUserId, opt => opt.Ignore())
+                .ForMember(p => p.IsActive, opt => opt.Ignore());
         }
     }
 }

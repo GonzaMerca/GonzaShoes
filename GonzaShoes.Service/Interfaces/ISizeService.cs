@@ -8,6 +8,7 @@ namespace GonzaShoes.Service.Interfaces
         Task<SizeDTO?> GetSizeByIdAsync(int id);
         Task<SizeDTO?> GetSizeByNumberAsync(decimal number);
         Task<List<SizeDTO>> GetSizesAsync(SizeSearchDTO searchDTO);
+        Task<List<NameIdDTO>> GetNameIdDTOsAsync();
         Task<ValidationResultDTO> SaveSizeAsync(SizeDTO Size);
         Task<ValidationResultDTO> UpdateStatusAsync(int id, bool isActive);
     }

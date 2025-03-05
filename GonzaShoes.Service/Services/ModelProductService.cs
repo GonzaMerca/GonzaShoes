@@ -10,11 +10,14 @@ namespace GonzaShoes.Service.Services
     public class ModelProductService : BaseService, IModelProductService
     {
         private readonly IModelProductRepository modelProductRepository;
+        private readonly IProductService productService;
+
         private readonly IMapper mapper;
 
-        public ModelProductService(IModelProductRepository modelProductRepository, IMapper mapper)
+        public ModelProductService(IModelProductRepository modelProductRepository, IProductService productService, IMapper mapper)
         {
             this.modelProductRepository = modelProductRepository;
+            this.productService = productService;
 
             this.mapper = mapper;
         }
@@ -32,6 +35,11 @@ namespace GonzaShoes.Service.Services
         public async Task<List<ModelProductDTO>> GetModelProductsAsync(ModelProductSearchDTO searchDTO)
         {
             return this.mapper.Map<List<ModelProduct>, List<ModelProductDTO>>(await this.modelProductRepository.GetModelProductsAsync(searchDTO));
+        }
+
+        public async Task<List<NameIdDTO>> GetNameIdDTOsAsync()
+        {
+            return await this.modelProductRepository.GetNameIdDTOsAsync();
         }
 
         public async Task<ValidationResultDTO> SaveModelProductAsync(ModelProductDTO dto)
@@ -61,28 +69,28 @@ namespace GonzaShoes.Service.Services
             return validationResultDTO;
         }
 
-        private async Task<ValidationResultDTO> ValidateSaveModelProductAsync(ModelProductDTO ModelProduct)
+        private async Task<ValidationResultDTO> ValidateSaveModelProductAsync(ModelProductDTO modelProduct)
         {
             ValidationResultDTO validationResultDTO = new ValidationResultDTO();
 
-            if (string.IsNullOrWhiteSpace(ModelProduct.Name))
+            if (string.IsNullOrWhiteSpace(modelProduct.Name))
                 validationResultDTO.ErrorMessages.Add("Falta ingresar el nombre del usuario");
-            else if (ModelProduct.Name.Length > 50)
+            else if (modelProduct.Name.Length > 50)
                 validationResultDTO.ErrorMessages.Add("El nombre no puede contener mas de 50 caracteres");
             else
             {
-                ModelProduct? ModelProductDb = await this.modelProductRepository.GetModelProductByNameAsync(ModelProduct.Name);
+                ModelProduct? ModelProductDb = await this.modelProductRepository.GetModelProductByNameAsync(modelProduct.Name);
 
-                if (ModelProductDb != null && (ModelProduct.Id == 0 || ModelProductDb.Id != ModelProduct.Id))
+                if (ModelProductDb != null && (modelProduct.Id == 0 || ModelProductDb.Id != modelProduct.Id))
                     validationResultDTO.ErrorMessages.Add("El nombre de la marca debe ser único");
             }
 
             return validationResultDTO;
         }
 
-        public async Task<ValidationResultDTO> UpdateStatusAsync(int ModelProductId, bool isActive)
+        public async Task<ValidationResultDTO> UpdateStatusAsync(int modelProductId, bool isActive)
         {
-            ValidationResultDTO validationResultDTO = new ValidationResultDTO();
+            ValidationResultDTO validationResultDTO = await ValidateUpdateStatusAsync(modelProductId, isActive);
             if (validationResultDTO.HasErrors)
                 return validationResultDTO;
 
@@ -90,7 +98,7 @@ namespace GonzaShoes.Service.Services
             {
                 ModelProduct obj = new ModelProduct()
                 {
-                    Id = ModelProductId,
+                    Id = modelProductId,
                     IsActive = !isActive,
                     UpdatedUserId = this.userId,
                     DateUpdated = DateTime.Now
@@ -104,6 +112,21 @@ namespace GonzaShoes.Service.Services
             }
 
             return validationResultDTO;
+        }
+
+        private async Task<ValidationResultDTO> ValidateUpdateStatusAsync(int colorId, bool isActive)
+        {
+            ValidationResultDTO resultDTO = new ValidationResultDTO();
+
+            if (isActive && await this.productService.IsAnyProductByModelProductAsync(colorId))
+                resultDTO.ErrorMessages.Add("El modelo contiene productos asociados, no puede anularlo");
+
+            return resultDTO;
+        }
+
+        public async Task<bool> IsAnyModelProductByBrandAsync(int brandId)
+        {
+            return await modelProductRepository.IsAnyModelProductByBrandAsync(brandId);
         }
     }
 }

@@ -10,11 +10,14 @@ namespace GonzaShoes.Service.Services
     public class SizeService : BaseService, ISizeService
     {
         private readonly ISizeRepository sizeRepository;
+        private readonly IProductService productService;
+
         private readonly IMapper mapper;
 
-        public SizeService(ISizeRepository sizeRepository, IMapper mapper)
+        public SizeService(ISizeRepository sizeRepository, IProductService productService, IMapper mapper)
         {
             this.sizeRepository = sizeRepository;
+            this.productService = productService;
 
             this.mapper = mapper;
         }
@@ -32,6 +35,11 @@ namespace GonzaShoes.Service.Services
         public async Task<List<SizeDTO>> GetSizesAsync(SizeSearchDTO searchDTO)
         {
             return this.mapper.Map<List<Size>, List<SizeDTO>>(await this.sizeRepository.GetSizesAsync(searchDTO));
+        }
+
+        public async Task<List<NameIdDTO>> GetNameIdDTOsAsync()
+        {
+            return await this.sizeRepository.GetNameIdDTOsAsync();
         }
 
         public async Task<ValidationResultDTO> SaveSizeAsync(SizeDTO dto)
@@ -65,24 +73,22 @@ namespace GonzaShoes.Service.Services
         {
             ValidationResultDTO validationResultDTO = new ValidationResultDTO();
 
-            //if (string.IsNullOrWhiteSpace(Size.Name))
-            //    validationResultDTO.ErrorMessages.Add("Falta ingresar el nombre del usuario");
-            //else if (Size.Name.Length > 50)
-            //    validationResultDTO.ErrorMessages.Add("El nombre no puede contener mas de 50 caracteres");
-            //else
-            //{
-            //    Size? SizeDb = await this.sizeRepository.GetSizeByNameAsync(Size.Name);
+            if (Size.Number <= 0)
+                validationResultDTO.ErrorMessages.Add("Falta ingresar el número del talle");
+            else
+            {
+                Size? SizeDb = await this.sizeRepository.GetSizeByNumberAsync(Size.Number);
 
-            //    if (SizeDb != null && (Size.Id == 0 || SizeDb.Id != Size.Id))
-            //        validationResultDTO.ErrorMessages.Add("El nombre de la marca debe ser único");
-            //}
+                if (SizeDb != null && (Size.Id == 0 || SizeDb.Id != Size.Id))
+                    validationResultDTO.ErrorMessages.Add("El número del talle debe ser único");
+            }
 
             return validationResultDTO;
         }
 
         public async Task<ValidationResultDTO> UpdateStatusAsync(int SizeId, bool isActive)
         {
-            ValidationResultDTO validationResultDTO = new ValidationResultDTO();
+            ValidationResultDTO validationResultDTO = await ValidateUpdateStatusAsync(SizeId, isActive);
             if (validationResultDTO.HasErrors)
                 return validationResultDTO;
 
@@ -104,6 +110,16 @@ namespace GonzaShoes.Service.Services
             }
 
             return validationResultDTO;
+        }
+
+        private async Task<ValidationResultDTO> ValidateUpdateStatusAsync(int colorId, bool isActive)
+        {
+            ValidationResultDTO resultDTO = new ValidationResultDTO();
+
+            if (isActive && await this.productService.IsAnyProductBySizeAsync(colorId))
+                resultDTO.ErrorMessages.Add("El talle contiene productos asociados, no puede anularlo");
+
+            return resultDTO;
         }
     }
 }

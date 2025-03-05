@@ -21,20 +21,36 @@ namespace GonzaShoes.Data.Repositories
 
         public async Task<Product?> GetProductByNameAsync(string name)
         {
-            return await this.dbContext.Products.SingleOrDefaultAsync(p => p.Model.Name == name);
+            return await this.dbContext.Products.SingleOrDefaultAsync(p => p.ModelProduct.Name == name);
         }
 
         public async Task<List<Product>> GetProductsAsync(ProductSearchDTO searchDTO)
         {
-            IQueryable<Product> query = this.dbContext.Products.Include(x => x.Model);
+            IQueryable<Product> query = this.dbContext.Products.Include(x => x.ModelProduct)
+                                                               .Include(x => x.Brand)
+                                                               .Include(x => x.Color)
+                                                               .Include(x => x.Size);
 
             if (!string.IsNullOrWhiteSpace(searchDTO.Name))
-                query = query.Where(p => p.Model.Name.Contains(searchDTO.Name));
+                query = query.Where(p => p.ModelProduct.Name.Contains(searchDTO.Name));
+
+            if (searchDTO.BrandIds != null && searchDTO.BrandIds.Count > 0)
+                query = query.Where(p => searchDTO.BrandIds.Contains(p.BrandId));
+
+            if (searchDTO.ModelProductIds != null && searchDTO.ModelProductIds.Count > 0)
+                query = query.Where(p => searchDTO.ModelProductIds.Contains(p.ModelProductId));
+
+            if (searchDTO.ColorIds != null && searchDTO.ColorIds.Count > 0)
+                query = query.Where(p => searchDTO.ColorIds.Contains(p.ColorId));
+
+            if (searchDTO.SizeIds != null && searchDTO.SizeIds.Count > 0)
+                query = query.Where(p => searchDTO.SizeIds.Contains(p.SizeId));
 
             if (searchDTO.ActivationState != null)
                 query = query.Where(p => p.IsActive == searchDTO.GetActivationState());
 
-            return await query.ToListAsync();
+            var result = await query.ToListAsync();
+            return result;
         }
 
         public async Task SaveProductAsync(Product obj)
@@ -56,6 +72,32 @@ namespace GonzaShoes.Data.Repositories
             this.dbContext.Entry(obj).Property(p => p.UpdatedUserId).IsModified = true;
 
             await this.dbContext.SaveChangesAsync();
+        }
+
+        public async Task<bool> IsAnyProductAsync(ProductDTO product)
+        {
+            return await this.dbContext.Products.AnyAsync(p => p.BrandId == product.BrandId && p.ModelProductId == product.ModelProductId && 
+                                                               p.ColorId == product.ColorId && p.SizeId == product.SizeId);
+        }
+
+        public async Task<bool> IsAnyProductByBrandAsync(int brandId)
+        {
+            return await this.dbContext.Products.AnyAsync(p => p.BrandId == brandId);
+        }
+
+        public async Task<bool> IsAnyProductByModelProductAsync(int modelProduct)
+        {
+            return await this.dbContext.Products.AnyAsync(p => p.ModelProductId == modelProduct);
+        }
+
+        public async Task<bool> IsAnyProductByColorAsync(int colorId)
+        {
+            return await this.dbContext.Products.AnyAsync(p => p.ColorId == colorId);
+        }
+
+        public async Task<bool> IsAnyProductBySizeAsync(int sizeId)
+        {
+            return await this.dbContext.Products.AnyAsync(p => p.SizeId == sizeId);
         }
     }
 }

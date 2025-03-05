@@ -1,4 +1,5 @@
 ﻿using GonzaShoes.Data.Interfaces;
+using GonzaShoes.Model.DTOs;
 using GonzaShoes.Model.DTOs.Brand;
 using GonzaShoes.Model.Entities.Product;
 using Microsoft.EntityFrameworkCore;
@@ -35,6 +36,23 @@ namespace GonzaShoes.Data.Repositories
                 query = query.Where(p => p.IsActive == searchDTO.GetActivationState());
 
             return await query.ToListAsync();
+        }
+
+        public async Task<List<NameIdDTO>> GetNameIdDTOsAsync()
+        {
+            IQueryable<Brand> query = this.dbContext.Brands.Where(p => p.IsActive);
+
+            return await query.Select(p => new NameIdDTO()
+            {
+                Id = p.Id,
+                Name = p.Name,
+                NameIds = p.ModelProducts.Where(x => x.IsActive)
+                .Select(q => new NameIdDTO()
+                {
+                    Id = q.Id,
+                    Name = q.Name,
+                }).ToList()
+            }).ToListAsync();
         }
 
         public async Task SaveBrandAsync(Brand obj)

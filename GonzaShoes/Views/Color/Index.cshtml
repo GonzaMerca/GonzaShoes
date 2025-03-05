@@ -2,10 +2,10 @@
     Layout = "_Layout";
 }
 
-<h2 class="mb-4">Lista de Usuarios</h2>
+<h2 class="mb-4">Lista de Colores</h2>
 
-<!-- Botón para agregar usuario -->
-<a href="/User/Edit" class="btn btn-success mb-3">Agregar Usuario</a>
+<!-- Botón para agregar marca -->
+<a href="/Color/Edit" class="btn btn-success mb-3">Agregar Color</a>
 
 <!-- Formulario de búsqueda con filtros -->
 <form method="get" action="@Url.Action("Index")" class="row g-2 mb-3">
@@ -13,7 +13,7 @@
         <input type="text" name="Name" class="form-control" placeholder="Nombre" value="@Context.Request.Query["Name"]">
     </div>
     <div class="col-md-4">
-        <input type="text" name="Email" class="form-control" placeholder="Email" value="@Context.Request.Query["Email"]">
+        <input type="text" name="HexCode" class="form-control" placeholder="Código" value="@Context.Request.Query["HexCode"]">
     </div>
     <div class="col-md-3">
         <select name="ActivationState" class="form-control">
@@ -40,19 +40,30 @@
     <thead>
         <tr>
             <th>Nombre</th>
-            <th>Email</th>
+            <th>Código</th>
             <th>Estado</th>
             <th>Acciones</th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var user in Model)
+        @foreach (var brand in Model)
         {
+            // Asegurar que el código tenga #
+            var hexCode = brand.HexCode.StartsWith("#") ? brand.HexCode : "#" + brand.HexCode;
+
+            // Validar si es un color hexadecimal válido (3 o 6 caracteres después del #)
+            var isValidHex = System.Text.RegularExpressions.Regex.IsMatch(hexCode, "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$");
+
             <tr>
-                <td>@user.Name</td>
-                <td>@user.Email</td>
+                <td>@brand.Name</td>
                 <td>
-                    @if (user.IsActive)
+                    <span class="badge"
+                          style="background-color: @(isValidHex ? hexCode : "transparent"); color: @(isValidHex ? "white" : "black"); padding: 5px; border: 1px solid #ccc;">
+                        @(isValidHex ? hexCode : "Código inválido")
+                    </span>
+                </td>
+                <td>
+                    @if (brand.IsActive)
                     {
                         <span class="badge bg-success">Activo</span>
                     }
@@ -62,19 +73,19 @@
                     }
                 </td>
                 <td>
-                    <a href="/User/Edit/@user.Id" class="btn btn-warning btn-sm">Editar</a>
-                    <a href="/User/Duplicate/@user.Id" class="btn btn-info btn-sm">Duplicar</a>
-                    @if (user.Id > 1 && user.IsActive)
+                    <a href="/Color/Edit/@brand.Id" class="btn btn-warning btn-sm">Editar</a>
+                    <a href="/Color/Duplicate/@brand.Id" class="btn btn-info btn-sm">Duplicar</a>
+                    @if (brand.IsActive)
                     {
-                        <a asp-action="UpdateStatus" asp-route-id="@user.Id" asp-route-isActive="@user.IsActive"
-                           class="btn btn-danger btn-sm" onclick="return confirm('¿Seguro que deseas desactivar a este usuario?')">
+                        <a asp-action="UpdateStatus" asp-route-id="@brand.Id" asp-route-isActive="@brand.IsActive"
+                           class="btn btn-danger btn-sm" onclick="return confirm('¿Seguro que deseas desactivar a este color?')">
                             Desactivar
                         </a>
                     }
-                    else if (user.Id > 1)
+                    else
                     {
-                        <a asp-action="UpdateStatus" asp-route-id="@user.Id" asp-route-isActive="@user.IsActive"
-                           class="btn btn-success btn-sm" onclick="return confirm('¿Seguro que deseas activar a este usuario?')">
+                        <a asp-action="UpdateStatus" asp-route-id="@brand.Id" asp-route-isActive="@brand.IsActive"
+                           class="btn btn-success btn-sm" onclick="return confirm('¿Seguro que deseas activar a este color?')">
                             Activar
                         </a>
                     }

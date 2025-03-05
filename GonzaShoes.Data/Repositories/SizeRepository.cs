@@ -1,4 +1,5 @@
 ﻿using GonzaShoes.Data.Interfaces;
+using GonzaShoes.Model.DTOs;
 using GonzaShoes.Model.DTOs.Size;
 using GonzaShoes.Model.Entities.Product;
 using Microsoft.EntityFrameworkCore;
@@ -28,13 +29,24 @@ namespace GonzaShoes.Data.Repositories
         {
             IQueryable<Size> query = this.dbContext.Sizes;
 
-            if (!string.IsNullOrWhiteSpace(searchDTO.Name))
-                query = query.Where(p => p.Number.ToString().Contains(searchDTO.Name));
+            if (searchDTO.Number != null && searchDTO.Number > 0)
+                query = query.Where(p => p.Number == searchDTO.Number);
 
             if (searchDTO.ActivationState != null)
                 query = query.Where(p => p.IsActive == searchDTO.GetActivationState());
 
             return await query.ToListAsync();
+        }
+
+        public async Task<List<NameIdDTO>> GetNameIdDTOsAsync()
+        {
+            IQueryable<Size> query = this.dbContext.Sizes.Where(p => p.IsActive);
+
+            return await query.Select(p => new NameIdDTO()
+            {
+                Id = p.Id,
+                Name = p.Number.ToString()
+            }).ToListAsync();
         }
 
         public async Task SaveSizeAsync(Size obj)

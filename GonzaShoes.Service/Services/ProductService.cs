@@ -65,17 +65,12 @@ namespace GonzaShoes.Service.Services
         {
             ValidationResultDTO validationResultDTO = new ValidationResultDTO();
 
-            //if (string.IsNullOrWhiteSpace(Product.Name))
-            //    validationResultDTO.ErrorMessages.Add("Falta ingresar el nombre del usuario");
-            //else if (Product.Name.Length > 50)
-            //    validationResultDTO.ErrorMessages.Add("El nombre no puede contener mas de 50 caracteres");
-            //else
-            //{
-            //    Product? ProductDb = await this.productRepository.GetProductByNameAsync(Product.Name);
-
-            //    if (ProductDb != null && (Product.Id == 0 || ProductDb.Id != Product.Id))
-            //        validationResultDTO.ErrorMessages.Add("El nombre de la marca debe ser único");
-            //}
+            if (Product.Price < 0)
+                validationResultDTO.ErrorMessages.Add("El precio del producto no puede ser negativo");
+            if (Product.Stock < 0)
+                validationResultDTO.ErrorMessages.Add("El stock del producto no puede ser negativo");
+            if (await this.productRepository.IsAnyProductAsync(Product))
+                validationResultDTO.ErrorMessages.Add("Ya existe un producto con estas caracteristiscas");
 
             return validationResultDTO;
         }
@@ -104,6 +99,26 @@ namespace GonzaShoes.Service.Services
             }
 
             return validationResultDTO;
+        }
+
+        public async Task<bool> IsAnyProductByBrandAsync(int brandId)
+        {
+            return await productRepository.IsAnyProductByBrandAsync(brandId);
+        }
+
+        public async Task<bool> IsAnyProductByModelProductAsync(int modelProduct)
+        {
+            return await productRepository.IsAnyProductByModelProductAsync(modelProduct);
+        }
+
+        public async Task<bool> IsAnyProductByColorAsync(int colorId)
+        {
+            return await productRepository.IsAnyProductByColorAsync(colorId);
+        }
+
+        public async Task<bool> IsAnyProductBySizeAsync(int sizeId)
+        {
+            return await productRepository.IsAnyProductBySizeAsync(sizeId);
         }
     }
 }

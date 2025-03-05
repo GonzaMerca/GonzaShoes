@@ -10,11 +10,15 @@ namespace GonzaShoes.Service.Services
     public class BrandService : BaseService, IBrandService
     {
         private readonly IBrandRepository brandRepository;
+        private readonly IModelProductService modelProductService;
+        private readonly IProductService productService;
         private readonly IMapper mapper;
 
-        public BrandService(IBrandRepository brandRepository, IMapper mapper)
+        public BrandService(IBrandRepository brandRepository, IModelProductService modelProductService, IProductService productService, IMapper mapper)
         {
             this.brandRepository = brandRepository;
+            this.modelProductService = modelProductService;
+            this.productService = productService;
 
             this.mapper = mapper;
         }
@@ -32,6 +36,11 @@ namespace GonzaShoes.Service.Services
         public async Task<List<BrandDTO>> GetBrandsAsync(BrandSearchDTO searchDTO)
         {
             return this.mapper.Map<List<Brand>, List<BrandDTO>>(await this.brandRepository.GetBrandsAsync(searchDTO));
+        }
+
+        public async Task<List<NameIdDTO>> GetNameIdDTOsAsync()
+        {
+            return await this.brandRepository.GetNameIdDTOsAsync();
         }
 
         public async Task<ValidationResultDTO> SaveBrandAsync(BrandDTO dto)
@@ -66,7 +75,7 @@ namespace GonzaShoes.Service.Services
             ValidationResultDTO validationResultDTO = new ValidationResultDTO();
 
             if (string.IsNullOrWhiteSpace(Brand.Name))
-                validationResultDTO.ErrorMessages.Add("Falta ingresar el nombre del usuario");
+                validationResultDTO.ErrorMessages.Add("Falta ingresar el nombre de la marca");
             else if (Brand.Name.Length > 50)
                 validationResultDTO.ErrorMessages.Add("El nombre no puede contener mas de 50 caracteres");
             else
@@ -80,9 +89,9 @@ namespace GonzaShoes.Service.Services
             return validationResultDTO;
         }
 
-        public async Task<ValidationResultDTO> UpdateStatusAsync(int BrandId, bool isActive)
+        public async Task<ValidationResultDTO> UpdateStatusAsync(int brandId, bool isActive)
         {
-            ValidationResultDTO validationResultDTO = new ValidationResultDTO();
+            ValidationResultDTO validationResultDTO = await ValidateUpdateStatusAsync(brandId, isActive);
             if (validationResultDTO.HasErrors)
                 return validationResultDTO;
 
@@ -90,7 +99,7 @@ namespace GonzaShoes.Service.Services
             {
                 Brand obj = new Brand()
                 {
-                    Id = BrandId,
+                    Id = brandId,
                     IsActive = !isActive,
                     UpdatedUserId = this.userId,
                     DateUpdated = DateTime.Now
@@ -104,6 +113,18 @@ namespace GonzaShoes.Service.Services
             }
 
             return validationResultDTO;
+        }
+
+        private async Task<ValidationResultDTO> ValidateUpdateStatusAsync(int brandId, bool isActive)
+        {
+            ValidationResultDTO resultDTO = new ValidationResultDTO();
+
+            if (isActive && await this.modelProductService.IsAnyModelProductByBrandAsync(brandId))
+                resultDTO.ErrorMessages.Add("La marca contiene modelos asociados, no puede anularlo");
+            else if (isActive && await this.productService.IsAnyProductByBrandAsync(brandId))
+                resultDTO.ErrorMessages.Add("La marca contiene productos asociados, no puede anularlo");
+
+            return resultDTO;
         }
     }
 }

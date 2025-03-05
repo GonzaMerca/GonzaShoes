@@ -10,8 +10,12 @@ namespace GonzaShoes.Model.Entities.Product
         //public string Name { get; set; } = string.Empty;
 
         // Relationship with Model
-        public int ModelId { get; set; }
-        public ModelProduct Model { get; set; } = null!;
+        public int ModelProductId { get; set; }
+        public ModelProduct ModelProduct { get; set; } = null!;
+
+        // Relationship with Brand
+        public int BrandId { get; set; }
+        public Brand Brand { get; set; } = null!;
 
         // Relationship with Color
         public int ColorId { get; set; }

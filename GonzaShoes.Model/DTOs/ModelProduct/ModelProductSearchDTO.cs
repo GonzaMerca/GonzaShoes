@@ -3,6 +3,7 @@
     public class ModelProductSearchDTO
     {
         public string Name { get; set; } = string.Empty;
+        public List<int> BrandIds { get; set; } = [];
         public ActivationStateEnum? ActivationState { get; set; }
 
         public bool GetActivationState()

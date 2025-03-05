@@ -1,7 +1,6 @@
 using System.Diagnostics;
 using GonzaShoes.Model.DTOs;
-using GonzaShoes.Model.DTOs.Size;
-using GonzaShoes.Model.DTOs.User;
+using GonzaShoes.Model.DTOs.ModelProduct;
 using GonzaShoes.Models;
 using GonzaShoes.Service.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -9,15 +8,17 @@ using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace GonzaShoes.Controllers
 {
-    public class UserController : BackendController
+    public class ModelProductController : BackendController
     {
-        private readonly IUserService userService;
+        private readonly IModelProductService modelProductService;
+        private readonly IBrandService brandService;
 
-        private readonly ILogger<UserController> _logger;
+        private readonly ILogger<ModelProductController> _logger;
 
-        public UserController(IUserService userService, ILogger<UserController> logger)
+        public ModelProductController(IModelProductService modelProductService, IBrandService brandService, ILogger<ModelProductController> logger)
         {
-            this.userService = userService;
+            this.modelProductService = modelProductService;
+            this.brandService = brandService;
 
             _logger = logger;
         }
@@ -25,47 +26,56 @@ namespace GonzaShoes.Controllers
         public override Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
             SetUser();
-            this.userService.SetCurrentUser(userId);
+            this.modelProductService.SetCurrentUser(userId);
+            this.brandService.SetCurrentUser(userId);
             return base.OnActionExecutionAsync(context, next);
         }
 
-        public async Task<IActionResult> IndexAsync([FromQuery] UserSearchDTO searchDTO)
+        private async Task GetFiltersAsync()
         {
-            var users = await userService.GetUsersAsync(searchDTO);
+            ViewBag.Brands = await brandService.GetNameIdDTOsAsync();
+        }
+
+        public async Task<IActionResult> IndexAsync([FromQuery] ModelProductSearchDTO searchDTO)
+        {
+            var users = await modelProductService.GetModelProductsAsync(searchDTO);
+            await GetFiltersAsync();
 
             return View(users);
         }
 
-
         public async Task<IActionResult> EditAsync(int id)
         {
+            await GetFiltersAsync();
+
             if (id > 0)
             {
-                var user = await this.userService.GetUserByIdAsync(id);
+                var user = await this.modelProductService.GetModelProductByIdAsync(id);
                 if (user == null)
                     return NotFound();
 
                 return View("Edit", user);
             }
             else
-                return View("Edit", new UserDTO());
+                return View("Edit", new ModelProductDTO());
         }
 
         public async Task<IActionResult> DuplicateAsync(int id)
         {
+            await GetFiltersAsync();
 
             if (id > 0)
             {
-                var modelProduct = await this.userService.GetUserByIdAsync(id);
+                var modelProduct = await this.modelProductService.GetModelProductByIdAsync(id);
                 if (modelProduct == null)
                     return NotFound();
 
                 // Crear un nuevo objeto sin ID para que se considere como un nuevo modelo
-                var newModel = new UserDTO
+                var newModel = new ModelProductDTO
                 {
                     Id = 0, // Aseguramos que sea un nuevo registro
                     Name = modelProduct.Name,
-                    Email = modelProduct.Email
+                    BrandId = modelProduct.BrandId
                 };
 
                 return View("Edit", newModel);
@@ -78,7 +88,7 @@ namespace GonzaShoes.Controllers
         {
             if (id > 0)
             {
-                ValidationResultDTO validationResultDTO = await this.userService.UpdateStatusAsync(id, isActive);
+                ValidationResultDTO validationResultDTO = await this.modelProductService.UpdateStatusAsync(id, isActive);
                 if (validationResultDTO.HasErrors)
                     TempData["ErrorMessage"] = validationResultDTO.GetErrorMessages();
             }
@@ -87,19 +97,23 @@ namespace GonzaShoes.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Save(UserDTO user)
+        public async Task<IActionResult> Save(ModelProductDTO dto)
         {
             if (ModelState.IsValid)
             {
-                ValidationResultDTO validationResultDTO = await this.userService.SaveUserAsync(user);
+                ValidationResultDTO validationResultDTO = await this.modelProductService.SaveModelProductAsync(dto);
                 if (validationResultDTO.HasErrors)
                 {
                     ModelState.AddModelError(string.Empty, validationResultDTO.GetErrorMessages());
-                    return View("Edit", user);
+
+                    await GetFiltersAsync();
+                    return View("Edit", dto);
                 }
                 return RedirectToAction("Index");
             }
-            return View("Edit", user);
+
+            await GetFiltersAsync();
+            return View("Edit", dto);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

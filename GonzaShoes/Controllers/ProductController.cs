@@ -1,6 +1,9 @@
 using System.Diagnostics;
-using GonzaShoes.Model.Entities.Product;
+using GonzaShoes.Model.DTOs;
+using GonzaShoes.Model.DTOs.ModelProduct;
+using GonzaShoes.Model.DTOs.Product;
 using GonzaShoes.Models;
+using GonzaShoes.Service.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
@@ -8,37 +11,130 @@ namespace GonzaShoes.Controllers
 {
     public class ProductController : BackendController
     {
+        private readonly IProductService productService;
+        private readonly IModelProductService modelProductService;
+        private readonly IBrandService brandService;
+        private readonly IColorService colorService;
+        private readonly ISizeService sizeService;
+
         private readonly ILogger<ProductController> _logger;
 
-        public ProductController(ILogger<ProductController> logger)
+        public ProductController(IProductService productService,
+                                 IModelProductService modelProductService,
+                                 IBrandService brandService,
+                                 IColorService colorService,
+                                 ISizeService sizeService,
+                                 ILogger<ProductController> logger)
         {
+            this.productService = productService;
+            this.modelProductService = modelProductService;
+            this.brandService = brandService;
+            this.colorService = colorService;
+            this.sizeService = sizeService;
+
             _logger = logger;
         }
 
         public override Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
             SetUser();
+            this.productService.SetCurrentUser(userId);
+            this.modelProductService.SetCurrentUser(userId);
+            this.brandService.SetCurrentUser(userId);
+            this.colorService.SetCurrentUser(userId);
+            this.sizeService.SetCurrentUser(userId);
             return base.OnActionExecutionAsync(context, next);
         }
 
-        public IActionResult Index()
+        private async Task GetFiltersAsync(bool findModelProducts = true)
         {
-            return View();
+            ViewBag.Brands = await brandService.GetNameIdDTOsAsync();
+            if (findModelProducts)
+                ViewBag.ModelProducts = await modelProductService.GetNameIdDTOsAsync();
+            ViewBag.Colors = await colorService.GetNameIdDTOsAsync();
+            ViewBag.Sizes = await sizeService.GetNameIdDTOsAsync();
         }
 
-        public IActionResult Create() => View();
+        public async Task<IActionResult> IndexAsync([FromQuery] ProductSearchDTO searchDTO)
+        {
+            var users = await productService.GetProductsAsync(searchDTO);
+            await GetFiltersAsync();
+
+            return View(users);
+        }
+
+        public async Task<IActionResult> EditAsync(int id)
+        {
+            await GetFiltersAsync(false);
+
+            if (id > 0)
+            {
+                var user = await this.productService.GetProductByIdAsync(id);
+                if (user == null)
+                    return NotFound();
+
+                return View("Edit", user);
+            }
+            else
+                return View("Edit", new ProductDTO());
+        }
+
+        public async Task<IActionResult> DuplicateAsync(int id)
+        {
+            await GetFiltersAsync(false);
+
+            if (id > 0)
+            {
+                var modelProduct = await this.productService.GetProductByIdAsync(id);
+                if (modelProduct == null)
+                    return NotFound();
+
+                // Crear un nuevo objeto sin ID para que se considere como un nuevo modelo
+                var newModel = new ProductDTO
+                {
+                    Id = 0, // Aseguramos que sea un nuevo registro
+                    BrandId = modelProduct.BrandId,
+                    ModelProductId = modelProduct.ModelProductId,
+                    ColorId = modelProduct.ColorId,
+                    SizeId = modelProduct.SizeId,
+                    Price = modelProduct.Price,
+                    Stock = modelProduct.Stock
+                };
+
+                return View("Edit", newModel);
+            }
+
+            return RedirectToAction("Index");
+        }
+
+        public async Task<IActionResult> UpdateStatusAsync(int id, bool isActive)
+        {
+            if (id > 0)
+            {
+                ValidationResultDTO validationResultDTO = await this.productService.UpdateStatusAsync(id, isActive);
+                if (validationResultDTO.HasErrors)
+                    TempData["ErrorMessage"] = validationResultDTO.GetErrorMessages();
+            }
+            return RedirectToAction("Index");
+        }
 
         [HttpPost]
-        public async Task<IActionResult> Create(Product product)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Save(ProductDTO dto)
         {
             if (ModelState.IsValid)
             {
-                //_context.Add(product);
-                //await _context.SaveChangesAsync();
-                //return RedirectToAction(nameof(Index));
-                return View();
+                ValidationResultDTO validationResultDTO = await this.productService.SaveProductAsync(dto);
+                if (validationResultDTO.HasErrors)
+                {
+                    ModelState.AddModelError(string.Empty, validationResultDTO.GetErrorMessages());
+                    await GetFiltersAsync(false);
+                    return View("Edit", dto);
+                }
+                return RedirectToAction("Index");
             }
-            return View(product);
+            await GetFiltersAsync(false);
+            return View("Edit", dto);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

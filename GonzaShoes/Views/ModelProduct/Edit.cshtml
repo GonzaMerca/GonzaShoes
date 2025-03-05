@@ -1,0 +1,43 @@
+﻿@model GonzaShoes.Model.DTOs.ModelProduct.ModelProductDTO
+
+@{
+    ViewData["Title"] = Model.Id == 0 ? "Crear Modelo" : "Editar Modelo";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form asp-action="Save" method="post">
+    <!-- Muestra los errores generales de validación -->
+    <div class="form-group">
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group">
+        <label for="Name">Nombre</label>
+        <input type="text" id="Name" name="Name" class="form-control" value="@Model.Name" required />
+        @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group">
+        <label for="BrandId">Marca</label>
+        <select id="BrandId" name="BrandId" class="form-control" required>
+            <option value="">Seleccione una Marca</option>
+            @foreach (var brand in ViewBag.Brands)
+            {
+                <option value="@brand.Id" selected="@(Model.BrandId == brand.Id)">
+                    @brand.Name
+                </option>
+            }
+        </select>
+    </div>
+
+    <input type="hidden" name="Id" value="@Model.Id" />
+
+    <!-- Botones con espacio entre ellos -->
+    <div class="form-group mt-4 d-flex">
+        <button type="submit" class="btn btn-primary btn-lg me-3">
+            @((Model.Id == 0) ? "Crear" : "Guardar")
+        </button>
+        <a href="@Url.Action("Index", "ModelProduct")" class="btn btn-secondary btn-lg">Volver a la lista</a>
+    </div>
+</form>

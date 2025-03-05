@@ -1,0 +1,112 @@
+﻿@{
+    Layout = "_Layout";
+}
+
+<h2 class="mb-4">Lista de Modelos</h2>
+
+<!-- Botón para agregar modelo -->
+<a href="/ModelProduct/Edit" class="btn btn-success mb-3">Agregar Modelo</a>
+
+<!-- Formulario de búsqueda con filtros -->
+<form method="get" action="@Url.Action("Index")" class="row g-2 mb-3">
+    <div class="col-md-4">
+        <input type="text" name="Name" class="form-control" placeholder="Nombre" value="@Context.Request.Query["Name"]">
+    </div>
+
+    <div class="col-md-3">
+        <select name="BrandIds" id="BrandIds" class="form-control" multiple="multiple">
+            <option value="">Todas las Marcas</option>
+            @foreach (var brand in ViewBag.Brands)
+            {
+                // Convierte Context.Request.Query["BrandIds"] a una lista de IDs seleccionados
+                var selectedBrands = Context.Request.Query["BrandIds"].ToString().Split(',').ToList();
+
+                <option value="@brand.Id"
+                        selected="@(selectedBrands.Contains(brand.Id.ToString()) ? true : false)">
+                    @brand.Name
+                </option>
+            }
+        </select>
+
+    </div>
+
+    <div class="col-md-3">
+        <select name="ActivationState" class="form-control">
+            <option value="">Todos</option>
+            <option value="Active" selected="@(Context.Request.Query["ActivationState"] == "Active")">Activos</option>
+            <option value="Inactive" selected="@(Context.Request.Query["ActivationState"] == "Inactive")">Inactivos</option>
+        </select>
+    </div>
+    <div class="col-md-1">
+        <button type="submit" class="btn btn-primary w-100">Listar</button>
+    </div>
+</form>
+
+<!-- Tabla con los productos -->
+<table class="table table-striped table-bordered">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Marca</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var modelProduct in Model)
+        {
+            <tr>
+                <td>@modelProduct.Name</td>
+                <td>@modelProduct.BrandName</td>
+                <td>
+                    @if (modelProduct.IsActive)
+                    {
+                        <span class="badge bg-success">Activo</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger">Inactivo</span>
+                    }
+                </td>
+                <td>
+                    <a href="/ModelProduct/Edit/@modelProduct.Id" class="btn btn-warning btn-sm">Editar</a>
+                    <a href="/ModelProduct/Duplicate/@modelProduct.Id" class="btn btn-info btn-sm">Duplicar</a>
+                    @if (modelProduct.IsActive)
+                    {
+                        <a asp-action="UpdateStatus" asp-route-id="@modelProduct.Id" asp-route-isActive="@modelProduct.IsActive"
+                           class="btn btn-danger btn-sm" onclick="return confirm('¿Seguro que deseas desactivar a este modelo?')">
+                            Desactivar
+                        </a>
+                    }
+                    else
+                    {
+                        <a asp-action="UpdateStatus" asp-route-id="@modelProduct.Id" asp-route-isActive="@modelProduct.IsActive"
+                           class="btn btn-success btn-sm" onclick="return confirm('¿Seguro que deseas activar a este modelo?')">
+                            Activar
+                        </a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Mensaje de error usando TempData -->
+@if (TempData["ErrorMessage"] != null)
+{
+    <div id="errorMessage" class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<script>
+    $(document).ready(function () {
+        $('#BrandIds').select2({
+            placeholder: "Seleccionar marcas",
+            allowClear: true,
+            width: '100%' // Esto asegura que el dropdown se expanda adecuadamente
+        });
+    });
+</script>
+

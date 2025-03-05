@@ -10,7 +10,7 @@ namespace GonzaShoes.Model.DTOs.ModelProduct
 
         // Relationship with Brand
         public int BrandId { get; set; }
-        public BrandDTO Brand { get; set; } = null!;
+        public string BrandName { get; set; } = string.Empty;
 
         // A model has many products
         public List<ProductDTO> Products { get; set; } = [];

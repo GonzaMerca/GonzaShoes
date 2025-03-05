@@ -10,11 +10,13 @@ namespace GonzaShoes.Service.Services
     public class ColorService : BaseService, IColorService
     {
         private readonly IColorRepository colorRepository;
+        private readonly IProductService productService;
         private readonly IMapper mapper;
 
-        public ColorService(IColorRepository colorRepository, IMapper mapper)
+        public ColorService(IColorRepository colorRepository, IProductService productService, IMapper mapper)
         {
             this.colorRepository = colorRepository;
+            this.productService = productService;
 
             this.mapper = mapper;
         }
@@ -32,6 +34,11 @@ namespace GonzaShoes.Service.Services
         public async Task<List<ColorDTO>> GetColorsAsync(ColorSearchDTO searchDTO)
         {
             return this.mapper.Map<List<Color>, List<ColorDTO>>(await this.colorRepository.GetColorsAsync(searchDTO));
+        }
+
+        public async Task<List<NameIdDTO>> GetNameIdDTOsAsync()
+        {
+            return await this.colorRepository.GetNameIdDTOsAsync();
         }
 
         public async Task<ValidationResultDTO> SaveColorAsync(ColorDTO dto)
@@ -66,7 +73,7 @@ namespace GonzaShoes.Service.Services
             ValidationResultDTO validationResultDTO = new ValidationResultDTO();
 
             if (string.IsNullOrWhiteSpace(Color.Name))
-                validationResultDTO.ErrorMessages.Add("Falta ingresar el nombre del usuario");
+                validationResultDTO.ErrorMessages.Add("Falta ingresar el nombre del color");
             else if (Color.Name.Length > 50)
                 validationResultDTO.ErrorMessages.Add("El nombre no puede contener mas de 50 caracteres");
             else
@@ -74,15 +81,15 @@ namespace GonzaShoes.Service.Services
                 Color? ColorDb = await this.colorRepository.GetColorByNameAsync(Color.Name);
 
                 if (ColorDb != null && (Color.Id == 0 || ColorDb.Id != Color.Id))
-                    validationResultDTO.ErrorMessages.Add("El nombre de la marca debe ser único");
+                    validationResultDTO.ErrorMessages.Add("El nombre del color debe ser único");
             }
 
             return validationResultDTO;
         }
 
-        public async Task<ValidationResultDTO> UpdateStatusAsync(int ColorId, bool isActive)
+        public async Task<ValidationResultDTO> UpdateStatusAsync(int colorId, bool isActive)
         {
-            ValidationResultDTO validationResultDTO = new ValidationResultDTO();
+            ValidationResultDTO validationResultDTO = await ValidateUpdateStatusAsync(colorId, isActive);
             if (validationResultDTO.HasErrors)
                 return validationResultDTO;
 
@@ -90,7 +97,7 @@ namespace GonzaShoes.Service.Services
             {
                 Color obj = new Color()
                 {
-                    Id = ColorId,
+                    Id = colorId,
                     IsActive = !isActive,
                     UpdatedUserId = this.userId,
                     DateUpdated = DateTime.Now
@@ -104,6 +111,16 @@ namespace GonzaShoes.Service.Services
             }
 
             return validationResultDTO;
+        }
+
+        private async Task<ValidationResultDTO> ValidateUpdateStatusAsync(int colorId, bool isActive)
+        {
+            ValidationResultDTO resultDTO = new ValidationResultDTO();
+
+            if (isActive && await this.productService.IsAnyProductByColorAsync(colorId))
+                resultDTO.ErrorMessages.Add("El color contiene productos asociados, no puede anularlo");
+
+            return resultDTO;
         }
     }
 }

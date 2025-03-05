@@ -2,7 +2,7 @@
 {
     public class SizeSearchDTO
     {
-        public string Name { get; set; } = string.Empty;
+        public decimal? Number { get; set; }
         public ActivationStateEnum? ActivationState { get; set; }
 
         public bool GetActivationState()

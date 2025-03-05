@@ -76,6 +76,14 @@ builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
+app.Use(async (context, next) =>
+{
+    await next();
+
+    if (context.Response.StatusCode == 401)
+        context.Response.Redirect("/Account/Login");
+});
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {

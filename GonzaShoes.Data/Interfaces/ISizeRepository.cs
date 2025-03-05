@@ -1,4 +1,5 @@
-﻿using GonzaShoes.Model.DTOs.Size;
+﻿using GonzaShoes.Model.DTOs;
+using GonzaShoes.Model.DTOs.Size;
 using GonzaShoes.Model.Entities.Product;
 
 namespace GonzaShoes.Data.Interfaces
@@ -8,6 +9,7 @@ namespace GonzaShoes.Data.Interfaces
         Task<Size?> GetSizeByIdAsync(int id);
         Task<Size?> GetSizeByNumberAsync(decimal number);
         Task<List<Size>> GetSizesAsync(SizeSearchDTO searchDTO);
+        Task<List<NameIdDTO>> GetNameIdDTOsAsync();
         Task SaveSizeAsync(Size size);
         Task UpdateStatusAsync(Size obj);
     }

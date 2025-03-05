@@ -1,6 +1,4 @@
-﻿using GonzaShoes.Model.DTOs.Color;
-using GonzaShoes.Model.DTOs.ModelProduct;
-using GonzaShoes.Model.DTOs.Size;
+﻿using GonzaShoes.Model.DTOs.Size;
 
 namespace GonzaShoes.Model.DTOs.Product
 {
@@ -11,16 +9,20 @@ namespace GonzaShoes.Model.DTOs.Product
         //public string Name { get; set; } = string.Empty;
 
         // Relationship with Model
-        public int ModelId { get; set; }
-        public ModelProductDTO Model { get; set; } = null!;
+        public int ModelProductId { get; set; }
+        public string ModelProductName { get; set; } = string.Empty;
+
+        public int BrandId { get; set; }
+        public string BrandName { get; set; } = string.Empty;
 
         // Relationship with Color
         public int ColorId { get; set; }
-        public ColorDTO Color { get; set; } = null!;
+        public string ColorName { get; set; } = string.Empty;
+        public string ColorHexCode { get; set; } = string.Empty;
 
         // Relationship with Size
         public int SizeId { get; set; }
-        public SizeDTO Size { get; set; } = null!;
+        public decimal SizeNumber { get; set; }
 
         public decimal Price { get; set; }
         public int Stock { get; set; }

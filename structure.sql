@@ -52,7 +52,7 @@ CREATE TABLE [dbo].[Size] (
 );
 
 -- Tabla Model
-CREATE TABLE [dbo].[Model] (
+CREATE TABLE [dbo].[ModelProduct] (
     [Id] INT IDENTITY(1,1) PRIMARY KEY,
     [Name] NVARCHAR(255) NOT NULL,
     [BrandId] INT NOT NULL,
@@ -61,13 +61,14 @@ CREATE TABLE [dbo].[Model] (
     [CreatedUserId] INT NOT NULL,
     [UpdatedUserId] INT NULL,
     [IsActive] BIT NOT NULL DEFAULT 1,
-    CONSTRAINT FK_Model_Brand FOREIGN KEY ([BrandId]) REFERENCES [dbo].[Brand]([Id])
+    CONSTRAINT FK_ModelProduct_Brand FOREIGN KEY ([BrandId]) REFERENCES [dbo].[Brand]([Id])
 );
 
 -- Tabla Product
 CREATE TABLE [dbo].[Product] (
     [Id] INT IDENTITY(1,1) PRIMARY KEY,
-    [ModelId] INT NOT NULL,
+    [ModelProductId] INT NOT NULL,
+    [BrandId] INT NOT NULL,
     [ColorId] INT NOT NULL,
     [SizeId] INT NOT NULL,
     [Price] DECIMAL(18,5) NOT NULL,
@@ -77,7 +78,8 @@ CREATE TABLE [dbo].[Product] (
     [CreatedUserId] INT NOT NULL,
     [UpdatedUserId] INT NULL,
     [IsActive] BIT NOT NULL DEFAULT 1,
-    CONSTRAINT FK_Product_Model FOREIGN KEY ([ModelId]) REFERENCES [dbo].[Model]([Id]),
+    CONSTRAINT FK_Product_ModelProduct FOREIGN KEY ([ModelProductId]) REFERENCES [dbo].[ModelProduct]([Id]),
+    CONSTRAINT FK_Product_Brand FOREIGN KEY ([BrandId]) REFERENCES [dbo].[Brand]([Id]),
     CONSTRAINT FK_Product_Color FOREIGN KEY ([ColorId]) REFERENCES [dbo].[Color]([Id]),
     CONSTRAINT FK_Product_Size FOREIGN KEY ([SizeId]) REFERENCES [dbo].[Size]([Id])
 );
@@ -107,8 +109,8 @@ CREATE TABLE [dbo].[OrderItem] (
     [ProductName] NVARCHAR(255) NOT NULL,
     [BrandId] INT NOT NULL,
     [BrandName] NVARCHAR(255) NOT NULL,
-    [ModelId] INT NOT NULL,
-    [ModelName] NVARCHAR(255) NOT NULL,
+    [ModelProductId] INT NOT NULL,
+    [ModelProductName] NVARCHAR(255) NOT NULL,
     [ColorId] INT NOT NULL,
     [ColorName] NVARCHAR(255) NOT NULL,
     [SizeId] INT NOT NULL,
@@ -128,7 +130,7 @@ CREATE TABLE [dbo].[OrderItem] (
     CONSTRAINT FK_OrderItem_Order FOREIGN KEY ([OrderId]) REFERENCES [dbo].[Order]([Id]),
     CONSTRAINT FK_OrderItem_Product FOREIGN KEY ([ProductId]) REFERENCES [dbo].[Product]([Id]),
     CONSTRAINT FK_OrderItem_Brand FOREIGN KEY ([BrandId]) REFERENCES [dbo].[Brand]([Id]),
-    CONSTRAINT FK_OrderItem_Model FOREIGN KEY ([ModelId]) REFERENCES [dbo].[Model]([Id]),
+    CONSTRAINT FK_OrderItem_ModelProduct FOREIGN KEY ([ModelProductId]) REFERENCES [dbo].[ModelProduct]([Id]),
     CONSTRAINT FK_OrderItem_Color FOREIGN KEY ([ColorId]) REFERENCES [dbo].[Color]([Id]),
     CONSTRAINT FK_OrderItem_Size FOREIGN KEY ([SizeId]) REFERENCES [dbo].[Size]([Id])
 );

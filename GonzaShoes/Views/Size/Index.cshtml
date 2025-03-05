@@ -2,18 +2,16 @@
     Layout = "_Layout";
 }
 
-<h2 class="mb-4">Lista de Usuarios</h2>
+<h2 class="mb-4">Lista de Talle</h2>
 
-<!-- Botón para agregar usuario -->
-<a href="/User/Edit" class="btn btn-success mb-3">Agregar Usuario</a>
+<!-- Botón para agregar marca -->
+<a href="/Size/Edit" class="btn btn-success mb-3">Agregar Talle</a>
 
 <!-- Formulario de búsqueda con filtros -->
 <form method="get" action="@Url.Action("Index")" class="row g-2 mb-3">
     <div class="col-md-4">
-        <input type="text" name="Name" class="form-control" placeholder="Nombre" value="@Context.Request.Query["Name"]">
-    </div>
-    <div class="col-md-4">
-        <input type="text" name="Email" class="form-control" placeholder="Email" value="@Context.Request.Query["Email"]">
+        <input type="number" name="Number" class="form-control" placeholder="Número"
+               value="@Context.Request.Query["Number"]" step="any">
     </div>
     <div class="col-md-3">
         <select name="ActivationState" class="form-control">
@@ -40,19 +38,17 @@
     <thead>
         <tr>
             <th>Nombre</th>
-            <th>Email</th>
             <th>Estado</th>
             <th>Acciones</th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var user in Model)
+        @foreach (var size in Model)
         {
             <tr>
-                <td>@user.Name</td>
-                <td>@user.Email</td>
+                <td>@size.Number.ToString("0.#")</td>
                 <td>
-                    @if (user.IsActive)
+                    @if (size.IsActive)
                     {
                         <span class="badge bg-success">Activo</span>
                     }
@@ -62,19 +58,19 @@
                     }
                 </td>
                 <td>
-                    <a href="/User/Edit/@user.Id" class="btn btn-warning btn-sm">Editar</a>
-                    <a href="/User/Duplicate/@user.Id" class="btn btn-info btn-sm">Duplicar</a>
-                    @if (user.Id > 1 && user.IsActive)
+                    <a href="/Size/Edit/@size.Id" class="btn btn-warning btn-sm">Editar</a>
+                    <a href="/Size/Duplicate/@size.Id" class="btn btn-info btn-sm">Duplicar</a>
+                    @if (size.IsActive)
                     {
-                        <a asp-action="UpdateStatus" asp-route-id="@user.Id" asp-route-isActive="@user.IsActive"
-                           class="btn btn-danger btn-sm" onclick="return confirm('¿Seguro que deseas desactivar a este usuario?')">
+                        <a asp-action="UpdateStatus" asp-route-id="@size.Id" asp-route-isActive="@size.IsActive"
+                           class="btn btn-danger btn-sm" onclick="return confirm('¿Seguro que deseas desactivar a este Talle?')">
                             Desactivar
                         </a>
                     }
-                    else if (user.Id > 1)
+                    else
                     {
-                        <a asp-action="UpdateStatus" asp-route-id="@user.Id" asp-route-isActive="@user.IsActive"
-                           class="btn btn-success btn-sm" onclick="return confirm('¿Seguro que deseas activar a este usuario?')">
+                        <a asp-action="UpdateStatus" asp-route-id="@size.Id" asp-route-isActive="@size.IsActive"
+                           class="btn btn-success btn-sm" onclick="return confirm('¿Seguro que deseas activar a este Talle?')">
                             Activar
                         </a>
                     }

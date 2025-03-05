@@ -1,4 +1,5 @@
 ﻿using GonzaShoes.Data.Interfaces;
+using GonzaShoes.Model.DTOs;
 using GonzaShoes.Model.DTOs.Color;
 using GonzaShoes.Model.Entities.Product;
 using Microsoft.EntityFrameworkCore;
@@ -31,10 +32,25 @@ namespace GonzaShoes.Data.Repositories
             if (!string.IsNullOrWhiteSpace(searchDTO.Name))
                 query = query.Where(p => p.Name.Contains(searchDTO.Name));
 
+            if (!string.IsNullOrWhiteSpace(searchDTO.HexCode))
+                query = query.Where(p => p.HexCode.Contains(searchDTO.HexCode));
+
             if (searchDTO.ActivationState != null)
                 query = query.Where(p => p.IsActive == searchDTO.GetActivationState());
 
             return await query.ToListAsync();
+        }
+
+        public async Task<List<NameIdDTO>> GetNameIdDTOsAsync()
+        {
+            IQueryable<Color> query = this.dbContext.Colors.Where(p => p.IsActive);
+
+            return await query.Select(p => new NameIdDTO()
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Tag = p.HexCode
+            }).ToListAsync();
         }
 
         public async Task SaveColorAsync(Color obj)

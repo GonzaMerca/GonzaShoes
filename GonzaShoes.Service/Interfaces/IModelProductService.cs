@@ -8,7 +8,9 @@ namespace GonzaShoes.Service.Interfaces
         Task<ModelProductDTO?> GetModelProductByIdAsync(int id);
         Task<ModelProductDTO?> GetModelProductByNameAsync(string name);
         Task<List<ModelProductDTO>> GetModelProductsAsync(ModelProductSearchDTO searchDTO);
+        Task<List<NameIdDTO>> GetNameIdDTOsAsync();
         Task<ValidationResultDTO> SaveModelProductAsync(ModelProductDTO ModelProduct);
         Task<ValidationResultDTO> UpdateStatusAsync(int id, bool isActive);
+        Task<bool> IsAnyModelProductByBrandAsync(int brandId);
     }
 }

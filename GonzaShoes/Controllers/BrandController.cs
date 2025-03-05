@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using GonzaShoes.Model.DTOs;
-using GonzaShoes.Model.DTOs.Size;
-using GonzaShoes.Model.DTOs.User;
+using GonzaShoes.Model.DTOs.Brand;
+using GonzaShoes.Model.DTOs.ModelProduct;
 using GonzaShoes.Models;
 using GonzaShoes.Service.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -9,15 +9,15 @@ using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace GonzaShoes.Controllers
 {
-    public class UserController : BackendController
+    public class BrandController : BackendController
     {
-        private readonly IUserService userService;
+        private readonly IBrandService brandService;
 
-        private readonly ILogger<UserController> _logger;
-
-        public UserController(IUserService userService, ILogger<UserController> logger)
+        private readonly ILogger<BrandController> _logger;
+        
+        public BrandController(IBrandService brandService, ILogger<BrandController> logger)
         {
-            this.userService = userService;
+            this.brandService = brandService;
 
             _logger = logger;
         }
@@ -25,13 +25,13 @@ namespace GonzaShoes.Controllers
         public override Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
             SetUser();
-            this.userService.SetCurrentUser(userId);
+            this.brandService.SetCurrentUser(userId);
             return base.OnActionExecutionAsync(context, next);
         }
 
-        public async Task<IActionResult> IndexAsync([FromQuery] UserSearchDTO searchDTO)
+        public async Task<IActionResult> IndexAsync([FromQuery] BrandSearchDTO searchDTO)
         {
-            var users = await userService.GetUsersAsync(searchDTO);
+            var users = await brandService.GetBrandsAsync(searchDTO);
 
             return View(users);
         }
@@ -41,31 +41,29 @@ namespace GonzaShoes.Controllers
         {
             if (id > 0)
             {
-                var user = await this.userService.GetUserByIdAsync(id);
+                var user = await this.brandService.GetBrandByIdAsync(id);
                 if (user == null)
                     return NotFound();
 
                 return View("Edit", user);
             }
             else
-                return View("Edit", new UserDTO());
+                return View("Edit", new BrandDTO());
         }
 
         public async Task<IActionResult> DuplicateAsync(int id)
         {
-
             if (id > 0)
             {
-                var modelProduct = await this.userService.GetUserByIdAsync(id);
+                var modelProduct = await this.brandService.GetBrandByIdAsync(id);
                 if (modelProduct == null)
                     return NotFound();
 
                 // Crear un nuevo objeto sin ID para que se considere como un nuevo modelo
-                var newModel = new UserDTO
+                var newModel = new BrandDTO
                 {
                     Id = 0, // Aseguramos que sea un nuevo registro
-                    Name = modelProduct.Name,
-                    Email = modelProduct.Email
+                    Name = modelProduct.Name
                 };
 
                 return View("Edit", newModel);
@@ -78,7 +76,7 @@ namespace GonzaShoes.Controllers
         {
             if (id > 0)
             {
-                ValidationResultDTO validationResultDTO = await this.userService.UpdateStatusAsync(id, isActive);
+                ValidationResultDTO validationResultDTO = await this.brandService.UpdateStatusAsync(id, isActive);
                 if (validationResultDTO.HasErrors)
                     TempData["ErrorMessage"] = validationResultDTO.GetErrorMessages();
             }
@@ -87,19 +85,19 @@ namespace GonzaShoes.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Save(UserDTO user)
+        public async Task<IActionResult> Save(BrandDTO brand)
         {
             if (ModelState.IsValid)
             {
-                ValidationResultDTO validationResultDTO = await this.userService.SaveUserAsync(user);
+                ValidationResultDTO validationResultDTO = await this.brandService.SaveBrandAsync(brand);
                 if (validationResultDTO.HasErrors)
                 {
                     ModelState.AddModelError(string.Empty, validationResultDTO.GetErrorMessages());
-                    return View("Edit", user);
+                    return View("Edit", brand);
                 }
                 return RedirectToAction("Index");
             }
-            return View("Edit", user);
+            return View("Edit", brand);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

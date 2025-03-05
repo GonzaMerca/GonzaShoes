@@ -1,0 +1,118 @@
+﻿@model GonzaShoes.Model.DTOs.Color.ColorDTO
+
+@{
+    ViewData["Title"] = Model.Id == 0 ? "Crear Color" : "Editar Color";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form asp-action="Save" method="post">
+    <div class="form-group">
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+    </div>
+
+    <!-- Input de Nombre con autocompletado -->
+    <div class="form-group">
+        <label for="Name">Nombre</label>
+        <input type="text" id="Name" name="Name" class="form-control" list="colorList" value="@Model.Name" required />
+        <datalist id="colorList">
+            <!-- Se llenará con nombres de colores -->
+        </datalist>
+        @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
+    </div>
+
+    <!-- Input de Código con selector de color -->
+    <div class="form-group">
+        <label for="HexCode">Código</label>
+        <div class="d-flex align-items-center">
+            <input type="color" id="HexCode" name="HexCode" class="form-control form-control-color me-2" value="@Model.HexCode" required />
+            <input type="text" id="HexCodeText" class="form-control" value="@Model.HexCode" required />
+        </div>
+        @Html.ValidationMessageFor(model => model.HexCode, "", new { @class = "text-danger" })
+    </div>
+
+    <input type="hidden" name="Id" value="@Model.Id" />
+
+    <!-- Botones -->
+    <div class="form-group mt-4 d-flex">
+        <button type="submit" class="btn btn-primary btn-lg me-3">
+            @((Model.Id == 0) ? "Crear" : "Guardar")
+        </button>
+        <a href="@Url.Action("Index", "Color")" class="btn btn-secondary btn-lg">Volver a la lista</a>
+    </div>
+</form>
+
+<script>
+    // Lista de colores en español con códigos hexadecimales
+    const colorNamesES = {
+        "Negro": "#000000", "Blanco": "#FFFFFF", "Rojo": "#FF0000", "Lima": "#00FF00", "Azul": "#0000FF",
+        "Amarillo": "#FFFF00", "Naranja": "#FFA500", "Púrpura": "#800080", "Gris": "#808080",
+        "Rosa": "#FFC0CB", "Marrón": "#A52A2A", "Verde": "#008000", "Azul Marino": "#000080",
+        "Dorado": "#FFD700", "Oro Viejo": "#DAA520", "Verde Amarillo": "#ADFF2F", "Rosa Fuerte": "#FF69B4",
+        "Rojo Indio": "#CD5C5C", "Índigo": "#4B0082", "Caqui": "#F0E68C", "Lavanda": "#E6E6FA",
+        "Verde Césped": "#7CFC00", "Amarillo Claro": "#FFFACD", "Azul Claro": "#ADD8E6", "Coral Claro": "#F08080",
+        "Cian Claro": "#E0FFFF", "Amarillo Pálido": "#FAFAD2", "Gris Claro": "#D3D3D3",
+        "Verde Claro": "#90EE90", "Rosa Claro": "#FFB6C1", "Salmón Claro": "#FFA07A", "Verde Agua Claro": "#20B2AA",
+        "Azul Cielo Claro": "#87CEFA", "Gris Pizarra Claro": "#778899", "Azul Acero Claro": "#B0C4DE",
+        "Verde Lima": "#32CD32", "Granate": "#800000", "Aguamarina Media": "#66CDAA",
+        "Azul Medio": "#0000CD", "Orquídea Media": "#BA55D3", "Púrpura Medio": "#9370DB",
+        "Verde Mar Medio": "#3CB371", "Azul Pizarra Medio": "#7B68EE", "Verde Primavera Medio": "#00FA9A",
+        "Turquesa Medio": "#48D1CC", "Rojo Violeta Medio": "#C71585", "Azul Medianoche": "#191970",
+        "Mocasín": "#FFE4B5", "Blanco Navajo": "#FFDEAD", "Encaje Viejo": "#FDF5E6", "Oliva Oscuro": "#6B8E23",
+        "Naranja": "#FFA500", "Rojo Anaranjado": "#FF4500", "Orquídea": "#DA70D6", "Dorado Pálido": "#EEE8AA",
+        "Verde Pálido": "#98FB98", "Turquesa Pálido": "#AFEEEE", "Rosa Violeta Pálido": "#DB7093",
+        "Papaya": "#FFEFD5", "Durazno": "#FFDAB9", "Perú": "#CD853F", "Rosa": "#FFC0CB",
+        "Ciruela": "#DDA0DD", "Azul Polvo": "#B0E0E6", "Morado": "#800080", "Rojo": "#FF0000",
+        "Marrón Rosado": "#BC8F8F", "Azul Real": "#4169E1", "Marrón Oscuro": "#8B4513",
+        "Salmón": "#FA8072", "Marrón Arenoso": "#F4A460", "Verde Mar": "#2E8B57",
+        "Blanco Marfil": "#FFF5EE", "Siena": "#A0522D", "Plateado": "#C0C0C0", "Azul Cielo": "#87CEEB",
+        "Azul Pizarra": "#6A5ACD", "Gris Pizarra": "#708090", "Blanco Nieve": "#FFFAFA",
+        "Verde Primavera": "#00FF7F", "Azul Acero": "#4682B4", "Bronceado": "#D2B48C", "Verde Azulado": "#008080",
+        "Cardo": "#D8BFD8", "Tomate": "#FF6347", "Turquesa": "#40E0D0", "Violeta": "#EE82EE",
+        "Trigo": "#F5DEB3", "Humo Blanco": "#F5F5F5", "Amarillo": "#FFFF00", "Verde Amarillento": "#9ACD32"
+    };
+
+    // Referencias a los inputs
+    const nameInput = document.getElementById("Name");
+    const hexInput = document.getElementById("HexCode");
+    const hexTextInput = document.getElementById("HexCodeText");
+
+    // Cargar la lista de colores en el datalist
+    const colorList = document.getElementById("colorList");
+    Object.keys(colorNamesES).forEach(color => {
+        let option = document.createElement("option");
+        option.value = color; // Aquí se muestran los nombres en la lista
+        colorList.appendChild(option);
+    });
+
+    // Autocompletar HexCode al escribir el nombre del color
+    nameInput.addEventListener("input", function () {
+        let colorSeleccionado = nameInput.value.trim();
+        if (colorNamesES[colorSeleccionado]) {
+            hexInput.value = colorNamesES[colorSeleccionado]; // Autocompleta en el input color
+            hexTextInput.value = colorNamesES[colorSeleccionado]; // También en el campo de texto
+        }
+    });
+
+    // Cambiar el nombre al seleccionar un color en la paleta
+    hexInput.addEventListener("input", function () {
+        hexTextInput.value = hexInput.value; // Actualiza el campo de texto con el color hexadecimal
+
+        // Si el código existe en la lista, autocompleta el nombre
+        let nombreColor = Object.keys(colorNamesES).find(nombre => colorNamesES[nombre].toLowerCase() === hexInput.value.toLowerCase());
+        if (nombreColor) {
+            nameInput.value = nombreColor;
+        }
+    });
+
+    // Permitir escribir un código manualmente en el input de texto
+    hexTextInput.addEventListener("input", function () {
+        hexInput.value = hexTextInput.value; // Actualiza el input de color
+
+        // Si el código escrito coincide con un color de la lista, autocompleta el nombre
+        let nombreColor = Object.keys(colorNamesES).find(nombre => colorNamesES[nombre].toLowerCase() === hexTextInput.value.toLowerCase());
+        if (nombreColor) {
+            nameInput.value = nombreColor;
+        }
+    });
+</script>

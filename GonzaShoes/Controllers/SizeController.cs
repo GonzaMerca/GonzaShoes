@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using GonzaShoes.Model.DTOs;
+using GonzaShoes.Model.DTOs.ModelProduct;
 using GonzaShoes.Model.DTOs.Size;
-using GonzaShoes.Model.DTOs.User;
 using GonzaShoes.Models;
 using GonzaShoes.Service.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -9,15 +9,15 @@ using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace GonzaShoes.Controllers
 {
-    public class UserController : BackendController
+    public class SizeController : BackendController
     {
-        private readonly IUserService userService;
+        private readonly ISizeService sizeService;
 
-        private readonly ILogger<UserController> _logger;
+        private readonly ILogger<SizeController> _logger;
 
-        public UserController(IUserService userService, ILogger<UserController> logger)
+        public SizeController(ISizeService sizeService, ILogger<SizeController> logger)
         {
-            this.userService = userService;
+            this.sizeService = sizeService;
 
             _logger = logger;
         }
@@ -25,13 +25,13 @@ namespace GonzaShoes.Controllers
         public override Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
         {
             SetUser();
-            this.userService.SetCurrentUser(userId);
+            this.sizeService.SetCurrentUser(userId);
             return base.OnActionExecutionAsync(context, next);
         }
 
-        public async Task<IActionResult> IndexAsync([FromQuery] UserSearchDTO searchDTO)
+        public async Task<IActionResult> IndexAsync([FromQuery] SizeSearchDTO searchDTO)
         {
-            var users = await userService.GetUsersAsync(searchDTO);
+            var users = await sizeService.GetSizesAsync(searchDTO);
 
             return View(users);
         }
@@ -41,14 +41,14 @@ namespace GonzaShoes.Controllers
         {
             if (id > 0)
             {
-                var user = await this.userService.GetUserByIdAsync(id);
+                var user = await this.sizeService.GetSizeByIdAsync(id);
                 if (user == null)
                     return NotFound();
 
                 return View("Edit", user);
             }
             else
-                return View("Edit", new UserDTO());
+                return View("Edit", new SizeDTO());
         }
 
         public async Task<IActionResult> DuplicateAsync(int id)
@@ -56,16 +56,15 @@ namespace GonzaShoes.Controllers
 
             if (id > 0)
             {
-                var modelProduct = await this.userService.GetUserByIdAsync(id);
+                var modelProduct = await this.sizeService.GetSizeByIdAsync(id);
                 if (modelProduct == null)
                     return NotFound();
 
                 // Crear un nuevo objeto sin ID para que se considere como un nuevo modelo
-                var newModel = new UserDTO
+                var newModel = new SizeDTO
                 {
                     Id = 0, // Aseguramos que sea un nuevo registro
-                    Name = modelProduct.Name,
-                    Email = modelProduct.Email
+                    Number = modelProduct.Number
                 };
 
                 return View("Edit", newModel);
@@ -78,7 +77,7 @@ namespace GonzaShoes.Controllers
         {
             if (id > 0)
             {
-                ValidationResultDTO validationResultDTO = await this.userService.UpdateStatusAsync(id, isActive);
+                ValidationResultDTO validationResultDTO = await this.sizeService.UpdateStatusAsync(id, isActive);
                 if (validationResultDTO.HasErrors)
                     TempData["ErrorMessage"] = validationResultDTO.GetErrorMessages();
             }
@@ -87,19 +86,19 @@ namespace GonzaShoes.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Save(UserDTO user)
+        public async Task<IActionResult> Save(SizeDTO dto)
         {
             if (ModelState.IsValid)
             {
-                ValidationResultDTO validationResultDTO = await this.userService.SaveUserAsync(user);
+                ValidationResultDTO validationResultDTO = await this.sizeService.SaveSizeAsync(dto);
                 if (validationResultDTO.HasErrors)
                 {
                     ModelState.AddModelError(string.Empty, validationResultDTO.GetErrorMessages());
-                    return View("Edit", user);
+                    return View("Edit", dto);
                 }
                 return RedirectToAction("Index");
             }
-            return View("Edit", user);
+            return View("Edit", dto);
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

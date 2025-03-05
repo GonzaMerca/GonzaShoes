@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace GonzaShoes.Model.Entities.Order
 {
     [Table("OrderItem")]
-    public class OrderItem
+    public class OrderItem : ContextualProps
     {
         public int Id { get; set; }
         public int OrderId { get; set; }
@@ -17,9 +17,9 @@ namespace GonzaShoes.Model.Entities.Order
         public Brand Brand { get; set; } = null!;
         public string BrandName { get; set; } = string.Empty;
 
-        public int ModelId { get; set; }
-        public ModelProduct Model { get; set; } = null!;
-        public string ModelName { get; set; } = string.Empty;
+        public int ModelProductId { get; set; }
+        public ModelProduct ModelProduct { get; set; } = null!;
+        public string ModelProductName { get; set; } = string.Empty;
 
         public int ColorId { get; set; }
         public Color Color { get; set; } = null!;

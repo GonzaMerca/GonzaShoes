@@ -266,6 +266,13 @@ function confirmarPago() {
                 errorElement.className = "alert alert-danger";
                 errorElement.innerText = data.errors;
                 errorContainer.appendChild(errorElement);
+
+                // Mostrar el contenedor de errores y ocultarlo después de 5 segundos
+                errorContainer.style.display = "block";
+                setTimeout(() => {
+                    errorContainer.style.display = "none";
+                }, 5000);
+
                 // Cerrar el modal de formas de pago si hay errores
                 $('#paymentModal').modal('hide');
             }

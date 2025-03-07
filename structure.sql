@@ -108,8 +108,6 @@ CREATE TABLE [dbo].[ProductStockFlow] (
     CONSTRAINT FK_ProductStockFlow_Brand FOREIGN KEY (BrandId) REFERENCES Brand(Id),
     CONSTRAINT FK_ProductStockFlow_Color FOREIGN KEY (ColorId) REFERENCES Color(Id),
     CONSTRAINT FK_ProductStockFlow_Size FOREIGN KEY (SizeId) REFERENCES Size(Id),
-    CONSTRAINT FK_ProductStockFlow_Order FOREIGN KEY (OrderId) REFERENCES [Order](Id),
-    CONSTRAINT FK_ProductStockFlow_OrderProductItem FOREIGN KEY (OrderProductItemId) REFERENCES OrderItem(Id)
 );
 
 -- Tabla Order

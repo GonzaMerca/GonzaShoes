@@ -54,6 +54,15 @@ namespace GonzaShoes.Service.Services
             {
                 obj = await this.productRepository.GetProductByIdAsync(dto.Id);
 
+                if (dto.Stock != obj.Stock)
+                {
+                    bool isDecreasingStock = true;
+                    if (dto.Stock > obj.Stock)
+                        isDecreasingStock = false;
+
+                    await this.UpdateStockAsync(dto.Id, dto.Stock - obj.Stock, 0, 0, "Cambio de stock en editor de producto", isDecreasingStock);
+                }
+
                 this.mapper.Map(dto, obj);
                 obj.DateUpdated = DateTime.Now;
                 obj.UpdatedUserId = userId;

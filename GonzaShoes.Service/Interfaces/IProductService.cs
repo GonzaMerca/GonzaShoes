@@ -10,6 +10,8 @@ namespace GonzaShoes.Service.Interfaces
         Task<List<ProductDTO>> GetProductsAsync(ProductSearchDTO searchDTO);
         Task<ValidationResultDTO> SaveProductAsync(ProductDTO Product);
         Task<ValidationResultDTO> UpdateStatusAsync(int id, bool isActive);
+        Task UpdateStockAsync(int productId, int quantity, int itemId, int orderId, string description, bool isDecreasingStock = true);
+        Task<bool> ValidateStockAsync(int id, int quantity);
         Task<bool> IsAnyProductByBrandAsync(int brandId);
         Task<bool> IsAnyProductByModelProductAsync(int modelProduct);
         Task<bool> IsAnyProductByColorAsync(int colorId);

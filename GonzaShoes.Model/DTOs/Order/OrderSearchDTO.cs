@@ -2,7 +2,11 @@
 {
     public class OrderSearchDTO
     {
-        public string Name { get; set; } = string.Empty;
+        public DateTime? DateFrom { get; set; }
+        public DateTime? DateTo { get; set; }
+        public int? OrderId { get; set; }
+        public int? PaymentMethodId { get; set; }
+        public int? UserId { get; set; }
         public ActivationStateEnum? ActivationState { get; set; }
 
         public bool GetActivationState()

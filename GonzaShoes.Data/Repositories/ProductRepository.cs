@@ -16,7 +16,11 @@ namespace GonzaShoes.Data.Repositories
 
         public async Task<Product?> GetProductByIdAsync(int id)
         {
-            return await this.dbContext.Products.SingleOrDefaultAsync(p => p.Id == id);
+            return await this.dbContext.Products.Include(x => x.ModelProduct)
+                                                .Include(x => x.Brand)
+                                                .Include(x => x.Color)
+                                                .Include(x => x.Size)
+                                                .SingleOrDefaultAsync(p => p.Id == id);
         }
 
         public async Task<Product?> GetProductByNameAsync(string name)
@@ -52,8 +56,7 @@ namespace GonzaShoes.Data.Repositories
             if (searchDTO.OnlyWithStock)
                 query = query.Where(p => p.Stock > 0);
 
-            var result = await query.ToListAsync();
-            return result;
+            return await query.ToListAsync();
         }
 
         public async Task SaveProductAsync(Product obj)
@@ -75,6 +78,11 @@ namespace GonzaShoes.Data.Repositories
             this.dbContext.Entry(obj).Property(p => p.UpdatedUserId).IsModified = true;
 
             await this.dbContext.SaveChangesAsync();
+        }
+
+        public async Task<bool> ValidateStockAsync(int productId, int quantity)
+        {
+            return await this.dbContext.Products.AnyAsync(p => p.Id == productId && (p.Stock - quantity) >= 0);
         }
 
         public async Task<bool> IsAnyProductAsync(ProductDTO product)

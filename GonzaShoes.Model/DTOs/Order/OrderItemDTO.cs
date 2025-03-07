@@ -16,6 +16,7 @@
 
         public int ColorId { get; set; }
         public string ColorName { get; set; } = string.Empty;
+        public string ColorHexCode { get; set; } = string.Empty;
 
         public int SizeId { get; set; }
         public decimal SizeNumber { get; set; }

@@ -40,6 +40,18 @@ namespace GonzaShoes.Data.Repositories
             return await query.ToListAsync();
         }
 
+        public async Task<List<NameIdDTO>> GetNameIdDTOsAsync()
+        {
+            IQueryable<User> query = this.dbContext.Users.Where(p => p.IsActive);
+
+            return await query.Select(p => new NameIdDTO()
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Tag = p.Email
+            }).ToListAsync();
+        }
+
         public async Task SaveUserAsync(User obj)
         {
             if (obj.Id == 0)

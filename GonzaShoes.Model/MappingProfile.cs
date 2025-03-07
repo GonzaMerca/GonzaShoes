@@ -47,6 +47,12 @@ namespace GonzaShoes.Model
                 .ForMember(p => p.CreatedUserId, opt => opt.Ignore())
                 .ForMember(p => p.IsActive, opt => opt.Ignore());
 
+            CreateMap<ProductStockFlow, ProductStockFlowDTO>();
+            CreateMap<ProductStockFlowDTO, ProductStockFlow>()
+                .ForMember(p => p.DateCreated, opt => opt.Ignore())
+                .ForMember(p => p.CreatedUserId, opt => opt.Ignore())
+                .ForMember(p => p.IsActive, opt => opt.Ignore());
+
             CreateMap<Size, SizeDTO>();
             CreateMap<SizeDTO, Size>()
                 .ForMember(p => p.DateCreated, opt => opt.Ignore())

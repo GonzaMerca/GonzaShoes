@@ -3,6 +3,7 @@ using GonzaShoes.Data.Interfaces;
 using GonzaShoes.Model.DTOs;
 using GonzaShoes.Model.DTOs.Product;
 using GonzaShoes.Model.Entities.Product;
+using GonzaShoes.Model.Entities.User;
 using GonzaShoes.Service.Interfaces;
 
 namespace GonzaShoes.Service.Services
@@ -10,11 +11,13 @@ namespace GonzaShoes.Service.Services
     public class ProductService : BaseService, IProductService
     {
         private readonly IProductRepository productRepository;
+        private readonly IProductStockFlowRepository productStockFlowRepository;
         private readonly IMapper mapper;
 
-        public ProductService(IProductRepository productRepository, IMapper mapper)
+        public ProductService(IProductRepository productRepository, IProductStockFlowRepository productStockFlowRepository, IMapper mapper)
         {
             this.productRepository = productRepository;
+            this.productStockFlowRepository = productStockFlowRepository;
 
             this.mapper = mapper;
         }
@@ -99,6 +102,57 @@ namespace GonzaShoes.Service.Services
             }
 
             return validationResultDTO;
+        }
+
+        public async Task UpdateStockAsync(int productId, int quantity, int itemId, int orderId, string description, bool isDecreasingStock = true)
+        {
+            Product product = await this.productRepository.GetProductByIdAsync(productId);
+
+            if (product != null)
+            {
+                if (isDecreasingStock)
+                    product.Stock -= quantity;
+                else
+                    product.Stock += quantity;
+
+                product.DateUpdated = DateTime.Now;
+                product.UpdatedUserId = userId;
+
+                ProductStockFlow flow = GetProductStockFlow(quantity, product.Stock, description, orderId, product, itemId, isDecreasingStock);
+
+                await this.productStockFlowRepository.SaveProductStockFlowsAsync(flow);
+
+                await this.productRepository.SaveProductAsync(product);
+            }
+        }
+
+        private ProductStockFlow GetProductStockFlow(decimal quantity, decimal remainingStock, string description, int orderId, Product product, int itemId, bool isDecreasingStock)
+        {
+            decimal income = (isDecreasingStock ? 0 : quantity);
+            decimal outcome = (isDecreasingStock ? quantity : 0);
+
+            return new ProductStockFlow()
+            {
+                Date = DateTime.Now,
+                BrandId = product.BrandId,
+                ColorId = product.ColorId,
+                ModelProductId = product.ModelProductId,
+                SizeId = product.SizeId,
+                Description = description,
+                Income = income,
+                Outcome = outcome,
+                RemainingStock = remainingStock,
+                OrderId = orderId,
+                OrderProductItemId = itemId,
+                ProductId = product.Id,
+                CreatedUserId = userId,
+                DateCreated = DateTime.Now
+            };
+        }
+
+        public async Task<bool> ValidateStockAsync(int productId, int quantity)
+        {
+            return await productRepository.ValidateStockAsync(productId, quantity);
         }
 
         public async Task<bool> IsAnyProductByBrandAsync(int brandId)

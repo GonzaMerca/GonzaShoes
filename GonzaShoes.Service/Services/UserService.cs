@@ -35,6 +35,11 @@ namespace GonzaShoes.Service.Services
             return this.mapper.Map<List<User>, List<UserDTO>>(await this.userRepository.GetUsersAsync(searchDTO));
         }
 
+        public async Task<List<NameIdDTO>> GetNameIdDTOsAsync()
+        {
+            return await this.userRepository.GetNameIdDTOsAsync();
+        }
+
         public async Task<ValidationResultDTO> SaveUserAsync(UserDTO dto)
         {
             ValidationResultDTO validationResultDTO = await ValidateSaveUserAsync(dto);

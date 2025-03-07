@@ -61,7 +61,6 @@ function agregarProducto() {
         productoExistente.cantidad += cantidad;
         productoExistente.total += selectedProduct.Price * cantidad;
     } else {
-        debugger;
         pedido.push(
             {
                 productId: selectedProduct.Id,
@@ -91,7 +90,7 @@ function actualizarPedido() {
     let subtotal = 0;
     pedido.forEach(p => {
         subtotal += p.total;
-        tbody.innerHTML += `<tr><td>${p.cantidad}</td><td>${p.name} (${p.colorName}, ${p.sizeName})</td><td>$${p.price.toFixed(2)}</td><td>$${p.total.toFixed(2)}</td><td><button class="btn-remove" onclick="eliminarProducto(${p.id}, ${p.colorId}, ${p.sizeId})">X</button></td></tr>`;
+        tbody.innerHTML += `<tr><td>${p.cantidad}</td><td>${p.name} (${p.colorName}, ${p.sizeName})</td><td>$${p.price.toFixed(2)}</td><td>$${p.total.toFixed(2)}</td><td><button class="btn-remove" onclick="eliminarProducto(${p.productId}, ${p.colorId}, ${p.sizeId})">X</button></td></tr>`;
     });
     document.getElementById("subtotal").innerText = `$${subtotal.toFixed(2)}`;
     actualizarTotal(subtotal);
@@ -204,7 +203,6 @@ function updatePaymentAmounts() {
 }
 
 function confirmarPago() {
-    debugger;
     let orderItems = pedido.map(p => ({
         ProductId: p.productId,
         ProductName: p.name,
@@ -249,21 +247,33 @@ function confirmarPago() {
         },
         body: JSON.stringify(order)
     })
-        .then(response => {
-            if (response.ok) {
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
                 // Limpiar la pantalla de edición
                 pedido = [];
                 actualizarPedido();
                 document.getElementById("descuento").value = 0;
                 document.getElementById("total").innerText = "$0.00";
                 document.getElementById("subtotal").innerText = "$0.00";
-                showPaymentModal();
+                $('#paymentModal').modal('hide');
             } else {
-                alert("Error al guardar el pedido.");
+                // Mostrar errores de validación
+                let errorContainer = document.getElementById("errorContainer");
+                errorContainer.innerHTML = "";
+
+                let errorElement = document.createElement("p");
+                errorElement.className = "alert alert-danger";
+                errorElement.innerText = data.errors;
+                errorContainer.appendChild(errorElement);
+                // Cerrar el modal de formas de pago si hay errores
+                $('#paymentModal').modal('hide');
             }
         })
         .catch(error => {
             console.error("Error:", error);
             alert("Error al guardar el pedido.");
+            // Cerrar el modal de formas de pago si hay errores
+            $('#paymentModal').modal('hide');
         });
 }

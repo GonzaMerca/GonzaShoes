@@ -14,15 +14,18 @@ namespace GonzaShoes.Controllers
     {
         private readonly IOrderService orderService;
         private readonly IProductService productService;
+        private readonly IUserService userService;
 
         private readonly ILogger<OrderController> _logger;
 
         public OrderController(IOrderService orderService,
                                IProductService productService,
+                               IUserService userService,
                                ILogger<OrderController> logger)
         {
             this.orderService = orderService;
             this.productService = productService;
+            this.userService = userService;
 
             _logger = logger;
         }
@@ -35,7 +38,7 @@ namespace GonzaShoes.Controllers
             return base.OnActionExecutionAsync(context, next);
         }
 
-        private async Task GetFiltersAsync()
+        private async Task GetPorductChooserAsync()
         {
             var products = await this.productService.GetProductsAsync(new ProductSearchDTO { ActivationState = ActivationStateEnum.Active, OnlyWithStock = true });
 
@@ -68,14 +71,28 @@ namespace GonzaShoes.Controllers
             ViewBag.Products = groupedProducts;
         }
 
-        public async Task<IActionResult> IndexAsync()
+        private async Task GetFiltersAsync()
         {
-            return View();
+            ViewBag.Users = await userService.GetNameIdDTOsAsync();
+        }
+
+
+        public async Task<IActionResult> HistoryAsync([FromQuery] OrderSearchDTO searchDTO)
+        {
+            if (!searchDTO.DateFrom.HasValue)
+                searchDTO.DateFrom = DateTime.Now;
+            if (!searchDTO.DateTo.HasValue)
+                searchDTO.DateTo = DateTime.Now;
+
+            List<OrderDTO> orders = await orderService.GetOrdersAsync(searchDTO);
+            await GetFiltersAsync();
+
+            return View(orders);
         }
 
         public async Task<IActionResult> EditAsync(int id)
         {
-            await GetFiltersAsync();
+            await GetPorductChooserAsync();
 
             if (id > 0)
             {
@@ -91,7 +108,7 @@ namespace GonzaShoes.Controllers
 
         public async Task<IActionResult> DuplicateAsync(int id)
         {
-            await GetFiltersAsync();
+            await GetPorductChooserAsync();
 
             if (id > 0)
             {
@@ -122,7 +139,7 @@ namespace GonzaShoes.Controllers
                 return View("Edit", newModel);
             }
 
-            return RedirectToAction("Index");
+            return RedirectToAction("History");
         }
 
         public async Task<IActionResult> UpdateStatusAsync(int id, bool isActive)
@@ -133,7 +150,7 @@ namespace GonzaShoes.Controllers
                 if (validationResultDTO.HasErrors)
                     TempData["ErrorMessage"] = validationResultDTO.GetErrorMessages();
             }
-            return RedirectToAction("Index");
+            return RedirectToAction("History");
         }
 
         [HttpPost]
@@ -146,14 +163,14 @@ namespace GonzaShoes.Controllers
                 if (validationResultDTO.HasErrors)
                 {
                     ModelState.AddModelError(string.Empty, validationResultDTO.GetErrorMessages());
-                    await GetFiltersAsync();
-                    return View("Edit", dto);
+                    await GetPorductChooserAsync();
+                    return Json(new { success = false, errors = validationResultDTO.GetErrorMessages() });
                 }
-                return RedirectToAction("Edit", new OrderDTO());
+                return Json(new { success = true });
             }
 
-            await GetFiltersAsync();
-            return View("Edit", dto);
+            await GetPorductChooserAsync();
+            return Json(new { success = false, errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList() });
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

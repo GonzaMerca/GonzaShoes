@@ -10,11 +10,13 @@ namespace GonzaShoes.Service.Services
     public class OrderService : BaseService, IOrderService
     {
         private readonly IOrderRepository orderRepository;
+        private readonly IProductService productService;
         private readonly IMapper mapper;
 
-        public OrderService(IOrderRepository orderRepository, IMapper mapper)
+        public OrderService(IOrderRepository orderRepository, IProductService productService, IMapper mapper)
         {
             this.orderRepository = orderRepository;
+            this.productService = productService;
 
             this.mapper = mapper;
         }
@@ -53,29 +55,38 @@ namespace GonzaShoes.Service.Services
 
             await this.orderRepository.SaveOrderAsync(obj);
 
+            await this.UpdateStockAsync(obj.OrderItems, obj.Id, true);
+
             return validationResultDTO;
         }
 
-        private async Task<ValidationResultDTO> ValidateSaveOrderAsync(OrderDTO Order)
+        private async Task UpdateStockAsync(List<OrderItem> items, int orderId, bool isDecreasingStock = true, string message = null)
+        {
+            string description = $"Pedido Nº {orderId}";
+
+            if (!isDecreasingStock && string.IsNullOrWhiteSpace(message))
+                description = $"Pedido Nº{orderId}, anulación de pedido";
+
+            if (!string.IsNullOrWhiteSpace(message))
+                description = $"Pedido Nº{orderId}, {message}";
+
+            this.productService.SetCurrentUser(userId);
+            foreach (OrderItem item in items)
+                await this.productService.UpdateStockAsync(item.ProductId, (int)item.Quantity, item.Id, orderId, description, isDecreasingStock);
+        }
+
+        private async Task<ValidationResultDTO> ValidateSaveOrderAsync(OrderDTO order)
         {
             ValidationResultDTO validationResultDTO = new ValidationResultDTO();
 
-            //if (string.IsNullOrWhiteSpace(Order.Name))
-            //    validationResultDTO.ErrorMessages.Add("Falta ingresar el nombre del usuario");
-            //else if (Order.Name.Length > 50)
-            //    validationResultDTO.ErrorMessages.Add("El nombre no puede contener mas de 50 caracteres");
-            //else
-            //{
-            //    Order? OrderDb = await this.orderRepository.GetOrderByNameAsync(Order.Name);
-
-            //    if (OrderDb != null && (Order.Id == 0 || OrderDb.Id != Order.Id))
-            //        validationResultDTO.ErrorMessages.Add("El nombre de la marca debe ser único");
-            //}
+            foreach (var item in order.OrderItems)
+                if (!await this.productService.ValidateStockAsync(item.ProductId, (int)item.Quantity))
+                    validationResultDTO.ErrorMessages.Add($"No cuenta con el suficiente stock para el producto: {item.ProductName} ({item.ColorName} - {item.SizeNumber})");
 
             return validationResultDTO;
         }
 
-        public async Task<ValidationResultDTO> UpdateStatusAsync(int OrderId, bool isActive)
+        public async Task<ValidationResultDTO> UpdateStatusAsync(int orderId, bool isActive)
         {
             ValidationResultDTO validationResultDTO = new ValidationResultDTO();
             if (validationResultDTO.HasErrors)
@@ -83,15 +94,20 @@ namespace GonzaShoes.Service.Services
 
             try
             {
-                Order obj = new Order()
-                {
-                    Id = OrderId,
-                    IsActive = !isActive,
-                    UpdatedUserId = this.userId,
-                    DateUpdated = DateTime.Now
-                };
+                Order obj = await this.orderRepository.GetOrderByIdAsync(orderId);
 
-                await this.orderRepository.UpdateStatusAsync(obj);
+                if (obj != null)
+                {
+                    obj.IsActive = !isActive;
+                    obj.UpdatedUserId = this.userId;
+                    obj.DateUpdated = DateTime.Now;
+
+                    await this.orderRepository.UpdateStatusAsync(obj);
+
+                    await this.UpdateStockAsync(obj.OrderItems, obj.Id, !isActive, !isActive ? "reactivación de pedido" : "anulación de pedido");
+                }
+                else
+                    validationResultDTO.ErrorMessages.Add($"No se encontró el pedido con Id: {orderId}");
             }
             catch (Exception ex)
             {

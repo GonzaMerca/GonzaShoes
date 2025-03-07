@@ -1,4 +1,5 @@
 ﻿using GonzaShoes.Data.Interfaces;
+using GonzaShoes.Model;
 using GonzaShoes.Model.DTOs.Order;
 using GonzaShoes.Model.Entities.Order;
 using Microsoft.EntityFrameworkCore;
@@ -16,17 +17,54 @@ namespace GonzaShoes.Data.Repositories
 
         public async Task<Order?> GetOrderByIdAsync(int id)
         {
-            return await this.dbContext.Orders.SingleOrDefaultAsync(p => p.Id == id);
+            return await this.dbContext.Orders.Include(x => x.OrderPayment)
+                                              .Include(x => x.OrderItems)
+                                               .ThenInclude(x => x.Product)
+                                              .Include(x => x.OrderItems)
+                                               .ThenInclude(x => x.Brand)
+                                              .Include(x => x.OrderItems)
+                                               .ThenInclude(x => x.ModelProduct)
+                                              .Include(x => x.OrderItems)
+                                               .ThenInclude(x => x.Color)
+                                              .Include(x => x.OrderItems)
+                                               .ThenInclude(x => x.Size)
+                                              .SingleOrDefaultAsync(p => p.Id == id);
         }
 
-        public async Task<List<Order>> GetOrdersAsync(OrderSearchDTO searchDTO)
+        public async Task<List<Order>> GetOrdersAsync(OrderSearchDTO dto)
         {
-            IQueryable<Order> query = this.dbContext.Orders;
+            IQueryable<Order> query = this.dbContext.Orders.Include(x => x.OrderPayment)
+                                                           .Include(x => x.OrderItems)
+                                                            .ThenInclude(x => x.Product)
+                                                           .Include(x => x.OrderItems)
+                                                            .ThenInclude(x => x.Brand)
+                                                           .Include(x => x.OrderItems)
+                                                            .ThenInclude(x => x.ModelProduct)
+                                                           .Include(x => x.OrderItems)
+                                                            .ThenInclude(x => x.Color)
+                                                           .Include(x => x.OrderItems)
+                                                            .ThenInclude(x => x.Size);
 
-            if (searchDTO.ActivationState != null)
-                query = query.Where(p => p.IsActive == searchDTO.GetActivationState());
+            if (dto.OrderId != null && dto.OrderId > 0)
+            {
+                query = query.Where(p => p.Id == dto.OrderId);
+            }
 
-            return await query.ToListAsync();
+            if (dto.UserId != null && dto.UserId > 0)
+                query = query.Where(p => p.CreatedUserId == dto.UserId);
+
+            if (dto.PaymentMethodId != null && dto.PaymentMethodId > 0)
+            {
+                query = query.Where(p => (dto.PaymentMethodId == (int)OrderPaymentTypeEnum.Cash && p.OrderPayment != null && p.OrderPayment.Cash > 0) ||
+                                         (dto.PaymentMethodId == (int)OrderPaymentTypeEnum.Debit && p.OrderPayment != null && p.OrderPayment.DebitCard > 0) ||
+                                         (dto.PaymentMethodId == (int)OrderPaymentTypeEnum.Credit && p.OrderPayment != null && p.OrderPayment.CreditCard > 0) ||
+                                         (dto.PaymentMethodId == (int)OrderPaymentTypeEnum.Transfer && p.OrderPayment != null && p.OrderPayment.Transfer > 0));
+            }
+
+            if (dto.ActivationState != null)
+                query = query.Where(p => p.IsActive == dto.GetActivationState());
+
+            return await query.Where(p => p.DateTime.Date >= dto.DateFrom.Value.Date && p.DateTime.Date <= dto.DateTo.Value.Date).ToListAsync();
         }
 
         public async Task SaveOrderAsync(Order obj)

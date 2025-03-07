@@ -84,6 +84,34 @@ CREATE TABLE [dbo].[Product] (
     CONSTRAINT FK_Product_Size FOREIGN KEY ([SizeId]) REFERENCES [dbo].[Size]([Id])
 );
 
+CREATE TABLE [dbo].[ProductStockFlow] (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    ProductId INT NOT NULL,
+    ModelProductId INT NOT NULL,
+    BrandId INT NOT NULL,
+    ColorId INT NOT NULL,
+    SizeId INT NOT NULL,
+    OrderId INT NULL,
+    Income DECIMAL(18,2) NOT NULL,
+    Outcome DECIMAL(18,2) NOT NULL,
+    RemainingStock DECIMAL(18,2) NOT NULL,
+    OrderProductItemId INT NULL,
+    Description NVARCHAR(255),
+    Date DATETIME NOT NULL,
+    [DateCreated] DATETIME NOT NULL DEFAULT GETDATE(),
+    [DateUpdated] DATETIME NULL,
+    [CreatedUserId] INT NOT NULL,
+    [UpdatedUserId] INT NULL,
+    [IsActive] BIT NOT NULL DEFAULT 1,
+    CONSTRAINT FK_ProductStockFlow_Product FOREIGN KEY (ProductId) REFERENCES Product(Id),
+    CONSTRAINT FK_ProductStockFlow_ModelProduct FOREIGN KEY (ModelProductId) REFERENCES ModelProduct(Id),
+    CONSTRAINT FK_ProductStockFlow_Brand FOREIGN KEY (BrandId) REFERENCES Brand(Id),
+    CONSTRAINT FK_ProductStockFlow_Color FOREIGN KEY (ColorId) REFERENCES Color(Id),
+    CONSTRAINT FK_ProductStockFlow_Size FOREIGN KEY (SizeId) REFERENCES Size(Id),
+    CONSTRAINT FK_ProductStockFlow_Order FOREIGN KEY (OrderId) REFERENCES [Order](Id),
+    CONSTRAINT FK_ProductStockFlow_OrderProductItem FOREIGN KEY (OrderProductItemId) REFERENCES OrderItem(Id)
+);
+
 -- Tabla Order
 CREATE TABLE [dbo].[Order] (
     [Id] INT IDENTITY(1,1) PRIMARY KEY,

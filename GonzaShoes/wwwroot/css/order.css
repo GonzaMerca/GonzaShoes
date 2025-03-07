@@ -1,0 +1,84 @@
+﻿body {
+    background-color: #e8f5c8;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.container {
+    max-width: 100%;
+    margin: auto;
+    display: flex;
+    gap: 15px;
+    flex-grow: 1;
+}
+
+.panel {
+    background: #fff;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
+}
+
+.detalle-pedido {
+    flex-grow: 1;
+}
+
+.totalizador {
+    /*    width: 100%;
+*/
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+    .form-group label {
+        font-weight: bold;
+    }
+
+    .form-group input, .form-group select {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+
+    .form-group button {
+        width: 100%;
+        padding: 10px;
+        border: none;
+        border-radius: 5px;
+        background-color: #28a745;
+        color: #fff;
+        font-size: 16px;
+    }
+
+.btn-remove {
+    background-color: #dc3545;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+/* Estilo personalizado para filas de la tabla que se ven como botones */
+.select-btn {
+    cursor: pointer;
+    background-color: #f8f9fa; /* Color de fondo claro */
+    border: 1px solid #ccc; /* Borde gris */
+    border-radius: 5px; /* Bordes redondeados */
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+    .select-btn:hover {
+        background-color: #007bff; /* Fondo azul al pasar el mouse */
+        color: white; /* Color del texto cuando se pasa el mouse */
+        transform: scale(1.05); /* Agrandar ligeramente al pasar el mouse */
+    }
+
+    .select-btn:active {
+        background-color: #0056b3; /* Fondo azul más oscuro cuando se hace clic */
+        transform: scale(1); /* Vuelve al tamaño original al hacer clic */
+    }

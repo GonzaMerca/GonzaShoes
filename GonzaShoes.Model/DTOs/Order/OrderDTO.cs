@@ -1,6 +1,6 @@
 ﻿namespace GonzaShoes.Model.DTOs.Order
 {
-    public class OrderDTO : ContextualProps
+    public class OrderDTO : ContextualProps, ICloneable
     {
         public int Id { get; set; }
         public DateTime DateTime { get; set; } = DateTime.Now;
@@ -12,5 +12,10 @@
         public decimal DiscountPercentage { get; set; }
         public decimal Total { get; set; }
         public string Observation { get; set; } = string.Empty;
+
+        public object Clone()
+        {
+            return this.MemberwiseClone();
+        }
     }
 }

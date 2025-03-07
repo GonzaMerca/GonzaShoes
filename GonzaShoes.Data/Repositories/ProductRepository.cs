@@ -49,6 +49,9 @@ namespace GonzaShoes.Data.Repositories
             if (searchDTO.ActivationState != null)
                 query = query.Where(p => p.IsActive == searchDTO.GetActivationState());
 
+            if (searchDTO.OnlyWithStock)
+                query = query.Where(p => p.Stock > 0);
+
             var result = await query.ToListAsync();
             return result;
         }
@@ -76,7 +79,7 @@ namespace GonzaShoes.Data.Repositories
 
         public async Task<bool> IsAnyProductAsync(ProductDTO product)
         {
-            return await this.dbContext.Products.AnyAsync(p => p.BrandId == product.BrandId && p.ModelProductId == product.ModelProductId && 
+            return await this.dbContext.Products.AnyAsync(p => p.Id != p.Id && p.BrandId == product.BrandId && p.ModelProductId == product.ModelProductId &&
                                                                p.ColorId == product.ColorId && p.SizeId == product.SizeId);
         }
 

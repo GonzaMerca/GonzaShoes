@@ -3,7 +3,7 @@ using GonzaShoes.Model.DTOs.Product;
 
 namespace GonzaShoes.Model.DTOs.ModelProduct
 {
-    public class ModelProductDTO : ContextualProps
+    public class ModelProductDTO : ContextualProps, ICloneable
     {
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
@@ -15,5 +15,9 @@ namespace GonzaShoes.Model.DTOs.ModelProduct
         // A model has many products
         public List<ProductDTO> Products { get; set; } = [];
 
+        public object Clone()
+        {
+            return this.MemberwiseClone();
+        }
     }
 }

@@ -2,6 +2,7 @@ using System.Diagnostics;
 using GonzaShoes.Model.DTOs;
 using GonzaShoes.Model.DTOs.Brand;
 using GonzaShoes.Model.DTOs.ModelProduct;
+using GonzaShoes.Model.DTOs.Order;
 using GonzaShoes.Models;
 using GonzaShoes.Service.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -59,12 +60,12 @@ namespace GonzaShoes.Controllers
                 if (modelProduct == null)
                     return NotFound();
 
-                // Crear un nuevo objeto sin ID para que se considere como un nuevo modelo
-                var newModel = new BrandDTO
-                {
-                    Id = 0, // Aseguramos que sea un nuevo registro
-                    Name = modelProduct.Name
-                };
+                BrandDTO newModel = (BrandDTO)modelProduct.Clone();
+                newModel.Id = 0;
+                newModel.CreatedUserId = userId;
+                newModel.DateCreated = DateTime.Now;
+                newModel.DateUpdated = null;
+                newModel.UpdatedUserId = null;
 
                 return View("Edit", newModel);
             }

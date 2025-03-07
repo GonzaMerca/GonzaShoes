@@ -60,13 +60,12 @@ namespace GonzaShoes.Controllers
                 if (modelProduct == null)
                     return NotFound();
 
-                // Crear un nuevo objeto sin ID para que se considere como un nuevo modelo
-                var newModel = new UserDTO
-                {
-                    Id = 0, // Aseguramos que sea un nuevo registro
-                    Name = modelProduct.Name,
-                    Email = modelProduct.Email
-                };
+                UserDTO newModel = (UserDTO)modelProduct.Clone();
+                newModel.Id = 0;
+                newModel.CreatedUserId = userId;
+                newModel.DateCreated = DateTime.Now;
+                newModel.DateUpdated = null;
+                newModel.UpdatedUserId = null;
 
                 return View("Edit", newModel);
             }

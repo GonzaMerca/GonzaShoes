@@ -4,7 +4,6 @@
     {
         public int Id { get; set; }
         public int OrderId { get; set; }
-        public OrderDTO Order { get; set; } = null!;
         public decimal Amount { get; set; }
         public decimal PayWith { get; set; }
         public decimal Cash { get; set; }

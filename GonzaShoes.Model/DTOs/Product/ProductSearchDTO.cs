@@ -8,6 +8,7 @@
         public List<int> ColorIds { get; set; } = [];
         public List<int> SizeIds { get; set; } = [];
         public ActivationStateEnum? ActivationState { get; set; }
+        public bool OnlyWithStock { get; set; }
 
         public bool GetActivationState()
         {

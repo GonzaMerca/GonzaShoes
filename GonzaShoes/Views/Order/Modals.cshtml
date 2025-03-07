@@ -1,0 +1,65 @@
+﻿<!-- Modal para seleccionar color y talle -->
+<div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="productModalLabel">Seleccionar Color y Talle</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h5 id="modalProductName"></h5>
+                <div class="form-group">
+                    <label for="colorSelect">Color:</label>
+                    <select id="colorSelect" class="form-control"></select>
+                </div>
+                <div class="form-group">
+                    <label for="sizeSelect">Talle:</label>
+                    <select id="sizeSelect" class="form-control"></select>
+                </div>
+                <div class="form-group">
+                    <label for="cantidad">Cantidad:</label>
+                    <input type="number" id="cantidad" value="1" min="1" class="form-control">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="agregarProducto()" data-bs-dismiss="modal">Agregar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para formas de pago -->
+<div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="paymentModalLabel">Formas de Pago</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <button class="btn btn-primary w-100 mb-2" onclick="setPaymentMethod('cash')">Efectivo</button>
+                    <input type="number" id="cash" class="form-control mb-2" placeholder="Monto en efectivo" oninput="updatePaymentAmounts()">
+                </div>
+                <div class="form-group">
+                    <button class="btn btn-primary w-100 mb-2" onclick="setPaymentMethod('debitCard')">Tarjeta de Débito</button>
+                    <input type="number" id="debitCard" class="form-control mb-2" placeholder="Monto en tarjeta de débito" oninput="updatePaymentAmounts()">
+                </div>
+                <div class="form-group">
+                    <button class="btn btn-primary w-100 mb-2" onclick="setPaymentMethod('creditCard')">Tarjeta de Crédito</button>
+                    <input type="number" id="creditCard" class="form-control mb-2" placeholder="Monto en tarjeta de crédito" oninput="updatePaymentAmounts()">
+                </div>
+                <div class="form-group">
+                    <button class="btn btn-primary w-100 mb-2" onclick="setPaymentMethod('transfer')">Transferencia</button>
+                    <input type="number" id="transfer" class="form-control mb-2" placeholder="Monto en transferencia" oninput="updatePaymentAmounts()">
+                </div>
+                <p>Restante: <span id="remainingAmount">$0.00</span></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmarPago()">Confirmar Pago</button>
+            </div>
+        </div>
+    </div>
+</div>

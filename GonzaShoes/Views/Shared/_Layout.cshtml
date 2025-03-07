@@ -45,7 +45,7 @@
                                 Pedidos
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="pedidosDropdown">
-                                <li><a class="dropdown-item" href="@Url.Action("Index", "Order")">Toma de pedidos</a></li>
+                                <li><a class="dropdown-item" href="@Url.Action("Edit", "Order")">Toma de pedidos</a></li>
                                 <li><a class="dropdown-item" href="@Url.Action("History", "Order")">Historial de pedidos</a></li>
                             </ul>
                         </li>
@@ -75,7 +75,7 @@
             </div>
         </nav>
     </header>
-    <div class="container">
+    <div class="container-fluid">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>

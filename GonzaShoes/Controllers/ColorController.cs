@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using GonzaShoes.Model.DTOs;
+using GonzaShoes.Model.DTOs.Brand;
 using GonzaShoes.Model.DTOs.Color;
 using GonzaShoes.Model.DTOs.ModelProduct;
 using GonzaShoes.Models;
@@ -58,13 +59,12 @@ namespace GonzaShoes.Controllers
                 if (modelProduct == null)
                     return NotFound();
 
-                // Crear un nuevo objeto sin ID para que se considere como un nuevo modelo
-                var newModel = new ColorDTO
-                {
-                    Id = 0, // Aseguramos que sea un nuevo registro
-                    Name = modelProduct.Name,
-                    HexCode = modelProduct.HexCode
-                };
+                ColorDTO newModel = (ColorDTO)modelProduct.Clone();
+                newModel.Id = 0;
+                newModel.CreatedUserId = userId;
+                newModel.DateCreated = DateTime.Now;
+                newModel.DateUpdated = null;
+                newModel.UpdatedUserId = null;
 
                 return View("Edit", newModel);
             }

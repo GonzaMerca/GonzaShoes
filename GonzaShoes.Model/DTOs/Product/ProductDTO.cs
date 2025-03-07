@@ -1,12 +1,10 @@
-﻿using GonzaShoes.Model.DTOs.Size;
-
-namespace GonzaShoes.Model.DTOs.Product
+﻿namespace GonzaShoes.Model.DTOs.Product
 {
-    public class ProductDTO : ContextualProps
+    public class ProductDTO : ContextualProps, ICloneable
     {
         public int Id { get; set; }
         //TODO: Ver de utilizar marca + model + color + talle
-        //public string Name { get; set; } = string.Empty;
+        public string Name => $"{BrandName} - {ModelProductName}".Trim();
 
         // Relationship with Model
         public int ModelProductId { get; set; }
@@ -26,5 +24,10 @@ namespace GonzaShoes.Model.DTOs.Product
 
         public decimal Price { get; set; }
         public int Stock { get; set; }
+
+        public object Clone()
+        {
+            return this.MemberwiseClone();
+        }
     }
 }
